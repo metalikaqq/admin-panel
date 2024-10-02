@@ -1,0 +1,46 @@
+
+// .body {
+//   display: flex;
+//   width: 100vw; /* Changed from 100vw to 100% to prevent horizontal overflow */
+//   height: 100vh; /* Inherits from body */
+//   max-height: 100%;
+
+// }
+
+// .main_container {
+//   flex-grow: 1; /* Allows main_container to take up remaining space */
+//   display: flex;
+//   flex-direction: column;
+//   height: 100%; /* Ensure it fills the container */
+// }
+
+// .content {
+//   flex-grow: 1; /* Allows content to expand */
+//   overflow: auto; /* Enable scrolling within content if necessary */
+//   padding: 16px; /* Example padding */
+//   background-color: cornflowerblue; /* As per your initial `.main` class */
+//   font-size: 24px;
+// }
+
+// .main {
+//   background-color: aqua;
+//   height: 100%;
+// }
+
+/* styles/page.module.scss */
+
+.main_container {
+  /* Flex container for main content */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content {
+  /* Styles for main content area */
+  flex-grow: 1;
+  overflow: auto;
+  padding: 16px;
+  background-color: cornflowerblue; /* Example background */
+  font-size: 24px;
+}
