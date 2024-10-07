@@ -1,0 +1,58 @@
+.account__page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.account__title {
+  font-size: 30px;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.account__section {
+  margin-bottom: 30px;
+}
+
+.account__input {
+  padding: 10px;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.account__button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.account__button:hover {
+  background-color: #0056b3;
+}
+
+.account__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.account__table th, .account__table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.account__table th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
+
+.account__select {
+  padding: 5px;
+  border-radius: 5px;
+}

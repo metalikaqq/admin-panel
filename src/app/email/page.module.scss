@@ -1,0 +1,82 @@
+.email__container {
+  display: flex;
+}
+
+.email__list {
+  width: 40%;
+  border-right: 1px solid #ddd;
+  padding: 10px;
+}
+
+.email__item {
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f9f9f9;
+  }
+}
+
+.email__subject {
+  font-weight: bold;
+}
+
+.email__sender {
+  font-size: 14px;
+  color: #888;
+}
+
+.email__content {
+  color: #555;
+}
+
+.email__details {
+  width: 60%;
+  padding: 20px;
+}
+
+.email__full {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.email__body {
+  margin-top: 20px;
+  white-space: pre-wrap;
+}
+
+.email__item {
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s; // Add smooth transition
+
+  &:hover {
+    background-color: #f9f9f9;
+  }
+
+  &.read {
+    background-color: #f0f0f0; // Lighter background for read emails
+    color: #888; // Faded text color for read emails
+  }
+
+  &.unread {
+    background-color: white;
+    font-weight: bold; // Bold text for unread emails
+  }
+}
+
+.email__subject {
+  font-weight: inherit; // Inherit bold for unread, normal for read
+}
+
+.email__sender {
+  font-size: 14px;
+  color: #888;
+}
+
+.email__content {
+  color: #555;
+}

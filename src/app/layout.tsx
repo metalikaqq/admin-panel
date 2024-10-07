@@ -1,4 +1,4 @@
-import 'normalize.css';
+import 'reset-css';
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
@@ -7,7 +7,6 @@ import { Roboto } from 'next/font/google'
 import { Metadata } from "next";
 import ResponsiveDrawer from "@/components/Sidebar/Sidebar"; // Use ResponsiveDrawer instead of Sidebar
 import s from './page.module.scss'; 
-
 
 const roboto = Roboto({
   weight: '400',
