@@ -1,39 +1,165 @@
-"use client";
+// "use client";
 
-import React, { useState } from "react";
-import s from "./ProductImage.module.scss";
+// import React, { useState, useEffect } from "react";
+// import s from "./ProductImage.module.scss";
 
-function ProductImage() {
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const [imageCount, setImageCount] = useState(8); // Initial count set to 8
+// interface ProductImageProps {
+//   onUpdate?: (images: string[]) => void; // Optional, for adding new images
+//   images?: string[]; // Optional, for displaying existing images
+// }
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+// const ProductImage: React.FC<ProductImageProps> = ({ onUpdate, images = [] }) => {
+//   const [selectedImages, setSelectedImages] = useState<string[]>(images);
+//   const [imageCount, setImageCount] = useState(8); // Initial count set to 8
+
+//   // Handle file input and update the selected images
+//   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+//     const file = event.target.files?.[0];
+//     if (file) {
+//       const imageUrl = URL.createObjectURL(file);
+//       setSelectedImages((prevImages) => {
+//         const newImages = [...prevImages];
+//         newImages[index] = imageUrl;
+//         return newImages;
+//       });
+//     }
+//   };
+
+//   // Increase the number of image inputs
+//   const addMoreImages = () => {
+//     setImageCount((prevCount) => prevCount + 4); // Add 4 more inputs
+//   };
+
+//   // Pass the selected images to the parent component whenever they change
+//   useEffect(() => {
+//     if (onUpdate) {
+//       onUpdate(selectedImages);
+//     }
+//   }, [selectedImages, onUpdate]);
+
+//   return (
+//     <div className={s.product__image}>
+//       <h3 className={s.product__image__title}>Upload Images</h3>
+
+//       <div className={s.product__image__wrapper}>
+//         <div className={s.product__image__top}>
+//           <label className={s.product__image__label}>
+//             {selectedImages[0] ? (
+//               <img src={selectedImages[0]} alt="Main product" className={s.product__image__preview} />
+//             ) : (
+//               <span className={s.product__image__placeholder}>Upload Main Image</span>
+//             )}
+//             <input
+//               className={s.product__image__input}
+//               type="file"
+//               accept="image/*"
+//               onChange={(e) => handleImageChange(e, 0)}
+//             />
+//           </label>
+//         </div>
+
+//         <div className={s.product__image__bottom}>
+//           {[...Array(imageCount)].map((_, index) => (
+//             <label key={index + 1} className={s.product__image__label}>
+//               {selectedImages[index + 1] ? (
+//                 <img
+//                   src={selectedImages[index + 1]}
+//                   alt={`Product ${index + 1}`}
+//                   className={s.product__image__preview}
+//                 />
+//               ) : (
+//                 <span className={s.product__image__placeholder}>Upload Image</span>
+//               )}
+//               <input
+//                 className={s.product__image__input}
+//                 type="file"
+//                 accept="image/*"
+//                 onChange={(e) => handleImageChange(e, index + 1)}
+//               />
+//             </label>
+//           ))}
+//         </div>
+
+//         <button className={s.product__image__addMoreButton} onClick={addMoreImages}>
+//           Add More Images
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ProductImage;
+
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import s from './ProductImage.module.scss';
+
+// Helper function to convert image file to base64
+const toBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+
+interface ProductImageProps {
+  onUpdate?: (images: string[]) => void; // Optional, for passing images
+  images?: string[]; // Optional, for displaying images
+}
+
+const ProductImage: React.FC<ProductImageProps> = ({
+  onUpdate,
+  images = [],
+}) => {
+  const [selectedImages, setSelectedImages] = useState<string[]>(images);
+  const [imageCount, setImageCount] = useState(8);
+
+  // Handle file input and update images as base64
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
+      const base64Image = await toBase64(file);
       setSelectedImages((prevImages) => {
         const newImages = [...prevImages];
-        newImages[index] = imageUrl;
+        newImages[index] = base64Image; // Store base64 string
         return newImages;
       });
     }
   };
 
+  // Add more image inputs
   const addMoreImages = () => {
-    setImageCount((prevCount) => prevCount + 4); // Increase by 4 more images when clicking "Add More"
+    setImageCount((prevCount) => prevCount + 4);
   };
+
+  // Update parent with the selected images
+  useEffect(() => {
+    if (onUpdate) {
+      onUpdate(selectedImages);
+    }
+  }, [selectedImages, onUpdate]);
 
   return (
     <div className={s.product__image}>
-      <h3 className={s.product__image__title}>Upload Image</h3>
-
+      <h3 className={s.product__image__title}>Upload Images</h3>
       <div className={s.product__image__wrapper}>
         <div className={s.product__image__top}>
           <label className={s.product__image__label}>
             {selectedImages[0] ? (
-              <img src={selectedImages[0]} alt="Main product" className={s.product__image__preview} />
+              <img
+                src={selectedImages[0]}
+                alt="Main product"
+                className={s.product__image__preview}
+              />
             ) : (
-              <span className={s.product__image__placeholder}>Upload Main Image</span>
+              <span className={s.product__image__placeholder}>
+                Upload Main Image
+              </span>
             )}
             <input
               className={s.product__image__input}
@@ -46,7 +172,7 @@ function ProductImage() {
 
         <div className={s.product__image__bottom}>
           {[...Array(imageCount)].map((_, index) => (
-            <label key={index} className={s.product__image__label}>
+            <label key={index + 1} className={s.product__image__label}>
               {selectedImages[index + 1] ? (
                 <img
                   src={selectedImages[index + 1]}
@@ -54,7 +180,9 @@ function ProductImage() {
                   className={s.product__image__preview}
                 />
               ) : (
-                <span className={s.product__image__placeholder}>Upload Image</span>
+                <span className={s.product__image__placeholder}>
+                  Upload Image
+                </span>
               )}
               <input
                 className={s.product__image__input}
@@ -66,12 +194,15 @@ function ProductImage() {
           ))}
         </div>
 
-        <button className={s.product__image__addMoreButton} onClick={addMoreImages}>
+        <button
+          className={s.product__image__addMoreButton}
+          onClick={addMoreImages}
+        >
           Add More Images
         </button>
       </div>
     </div>
   );
-}
+};
 
 export default ProductImage;

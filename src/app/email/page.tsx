@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import s from "./page.module.scss";
-import { IconButton } from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
-import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ReportIcon from "@mui/icons-material/Report";
+import React, { useState, useEffect } from 'react';
+import s from './page.module.scss';
+import { IconButton } from '@mui/material';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
+import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ReportIcon from '@mui/icons-material/Report';
 
 // Mock data for emails (replace with actual email fetching)
 const mockEmails = [
   {
     id: 1,
-    sender: "boss@company.com",
-    subject: "Project Update",
-    content: "Please find attached the latest update on the project...",
+    sender: 'boss@company.com',
+    subject: 'Project Update',
+    content: 'Please find attached the latest update on the project...',
     fullContent:
-      "Please find attached the latest update on the project. Make sure to review it and let me know if any changes are required by tomorrow.",
+      'Please find attached the latest update on the project. Make sure to review it and let me know if any changes are required by tomorrow.',
     isRead: false,
     isFavorite: false,
     isTrash: false,
@@ -26,11 +26,11 @@ const mockEmails = [
   },
   {
     id: 2,
-    sender: "hr@company.com",
-    subject: "Meeting Invitation",
-    content: "You are invited to the quarterly meeting...",
+    sender: 'hr@company.com',
+    subject: 'Meeting Invitation',
+    content: 'You are invited to the quarterly meeting...',
     fullContent:
-      "You are invited to the quarterly meeting happening on Friday, 10:00 AM. Please make sure to join via the provided link in the invitation.",
+      'You are invited to the quarterly meeting happening on Friday, 10:00 AM. Please make sure to join via the provided link in the invitation.',
     isRead: false,
     isFavorite: false,
     isTrash: false,

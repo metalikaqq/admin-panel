@@ -1,10 +1,10 @@
 // pages/account.tsx
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import s from "./page.module.scss";
+import React, { useState, useEffect } from 'react';
+import s from './page.module.scss';
 
-type UserRole = "admin" | "user";
+type UserRole = 'admin' | 'user';
 
 interface User {
   username: string;
@@ -12,17 +12,17 @@ interface User {
 }
 
 const mockCurrentUser: User = {
-  username: "john_doe",
-  role: "admin", // Mock role, can be 'user' or 'admin'
+  username: 'john_doe',
+  role: 'admin', // Mock role, can be 'user' or 'admin'
 };
 
 export default function AccountPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   // const [newRole, setNewRole] = useState<UserRole>("user");
   const [allUsers, setAllUsers] = useState<User[]>([
-    { username: "jane_smith", role: "user" },
-    { username: "mark_admin", role: "admin" },
+    { username: 'jane_smith', role: 'user' },
+    { username: 'mark_admin', role: 'admin' },
   ]); // Mock user list
 
   useEffect(() => {
@@ -32,11 +32,13 @@ export default function AccountPage() {
 
   const handlePasswordChangeRequest = () => {
     if (!email) {
-      alert("Please enter your email address!");
+      alert('Please enter your email address!');
       return;
     }
 
-    alert(`A confirmation email has been sent to ${email}. Please check your inbox to confirm the password change.`);
+    alert(
+      `A confirmation email has been sent to ${email}. Please check your inbox to confirm the password change.`
+    );
     // Implement logic to send confirmation email with a password reset link
   };
 
@@ -65,7 +67,10 @@ export default function AccountPage() {
               onChange={(e) => setEmail(e.target.value)}
               className={s.account__input}
             />
-            <button onClick={handlePasswordChangeRequest} className={s.account__button}>
+            <button
+              onClick={handlePasswordChangeRequest}
+              className={s.account__button}
+            >
               Request Password Change
             </button>
           </div>
@@ -74,7 +79,7 @@ export default function AccountPage() {
             <h3>Current Role: {currentUser.role}</h3>
           </div>
 
-          {currentUser.role === "admin" && (
+          {currentUser.role === 'admin' && (
             <div className={s.account__section}>
               <h3>Manage User Roles</h3>
               <table className={s.account__table}>
@@ -94,7 +99,10 @@ export default function AccountPage() {
                         <select
                           value={user.role}
                           onChange={(e) =>
-                            handleRoleChange(user.username, e.target.value as UserRole)
+                            handleRoleChange(
+                              user.username,
+                              e.target.value as UserRole
+                            )
                           }
                           className={s.account__select}
                         >

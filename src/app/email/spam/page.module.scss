@@ -8,6 +8,33 @@
   padding: 10px;
 }
 
+.email__details {
+  width: 60%;
+  padding: 20px;
+}
+
+.email__full {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.email__actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.email__container {
+  display: flex;
+}
+
+.email__list {
+  width: 40%;
+  border-right: 1px solid #ddd;
+  padding: 10px;
+}
+
 .email__item {
   padding: 15px;
   border-bottom: 1px solid #ddd;
@@ -81,4 +108,31 @@
 
 .email__content {
   color: #555;
+}
+
+.email__container {
+  display: flex;
+}
+
+.email__list {
+  width: 40%;
+  border-right: 1px solid #ddd;
+  padding: 10px;
+}
+
+.email__details {
+  width: 60%;
+  padding: 20px;
+}
+
+.email__full {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.email__actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
 }

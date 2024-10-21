@@ -1,0 +1,21 @@
+@import '@/utils/mixins.scss';
+@import '@/utils/vars.scss';
+
+.product {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 10px;
+
+  @include responsive(desktop-md) {
+    flex-direction: row;
+    padding: 0 40px;
+    padding-top: 75px;
+    position: relative;
+  }
+
+  &__img_wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+}

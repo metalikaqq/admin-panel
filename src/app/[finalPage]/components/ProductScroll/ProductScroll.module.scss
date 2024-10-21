@@ -1,5 +1,5 @@
-@import "@/utils/mixins.scss";
-@import "@/utils/vars.scss";
+@import '@/utils/mixins.scss';
+@import '@/utils/vars.scss';
 
 .productScroll {
   max-height: none;
@@ -140,7 +140,7 @@
   text-transform: uppercase;
 
   &:before {
-    content: "";
+    content: '';
     position: absolute;
     top: -50%;
     left: -100%;
@@ -173,7 +173,67 @@
   }
 }
 
-.image {
-  width: 100%;
-  height: 520px;
+.productScroll {
+  max-height: none;
+  overflow-y: visible;
+  background-color: transparent;
+  padding: 20px;
+  flex: 2;
+
+  @include responsive(desktop-md) {
+    width: 40%;
+    max-height: 100vh;
+    overflow-y: auto;
+    background-color: #fff;
+    @include hide-scrollbar;
+  }
+
+  // Стилізація заголовків усередині продуктового контенту
+  .productContent {
+    h1 {
+      font-size: 28px;
+      font-weight: bold;
+      color: black;
+      margin-bottom: 20px;
+
+      @include responsive(desktop-md) {
+        font-size: 32px;
+      }
+    }
+
+    h2 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: black;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin: 10px 0;
+
+      li {
+        margin-bottom: 10px;
+        font-size: 16px;
+        line-height: 1.5;
+        list-style-type: disc;
+
+        &::marker {
+          color: black;
+        }
+
+        @include responsive(desktop-md) {
+          font-size: 18px;
+        }
+      }
+    }
+
+    .nestedList {
+      list-style: circle;
+      padding-left: 30px;
+
+      li {
+        margin-bottom: 5px;
+      }
+    }
+  }
 }

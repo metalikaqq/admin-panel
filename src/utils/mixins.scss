@@ -1,0 +1,49 @@
+// Breakpoints
+$desktop-xl: 1920px;
+$desktop-lg: 1440px;
+$desktop-md: 1024px;
+$tablet: 768px;
+$mobile: 390px;
+
+// Mixins
+@mixin responsive($breakpoint) {
+  @if $breakpoint == desktop-xl {
+    @media (min-width: $desktop-xl) {
+      @content;
+    }
+  } @else if $breakpoint == desktop-lg {
+    @media (min-width: $desktop-lg) {
+      @content;
+    }
+  } @else if $breakpoint == desktop-md {
+    @media (min-width: $desktop-md) {
+      @content;
+    }
+  } @else if $breakpoint == tablet {
+    @media (min-width: $tablet) {
+      @content;
+    }
+  } @else if $breakpoint == mobile {
+    @media (min-width: $mobile) {
+      @content;
+    }
+  }
+}
+
+@mixin hide-scrollbar {
+  // Hide scrollbar for Chrome, Safari and Opera
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // Hide scrollbar for IE, Edge and Firefox
+  -ms-overflow-style: none; // IE and Edge
+  scrollbar-width: none; // Firefox
+}
+
+@mixin container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 1500px;
+}

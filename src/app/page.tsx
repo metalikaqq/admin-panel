@@ -1,6 +1,8 @@
-import s from './page.module.scss'
+import s from './page.module.scss';
 
 export default function Home() {
+  const some = 'fdfdgd';
+
   return (
     <div className={s.main}>
       <h1>Welcome to the Home Page!</h1>
