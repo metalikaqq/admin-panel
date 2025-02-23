@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+
+import React, { useEffect } from 'react';
 import s from './ProductScroll.module.scss';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function ProductScroll({ productInfo }: any) {
+interface ProductScrollProps {
+  productInfo: any;
+  onHtmlGenerated: (html: string) => void; // Callback to pass generated HTML
+}
+
+export default function ProductScroll({ productInfo, onHtmlGenerated }: ProductScrollProps) {
   function generateProductInfoHTML(productInfo: any[]): string {
     return productInfo
       .map((item) => {
@@ -36,65 +42,52 @@ export default function ProductScroll({ productInfo }: any) {
     return `
       <ul>
         ${items
-          .map(
-            (item) => `
+        .map(
+          (item) => `
           <li>${item.content}
-            ${
-              item.sublist && item.sublist.length > 0
-                ? generateListHTML(item.sublist)
-                : ''
+            ${item.sublist && item.sublist.length > 0
+              ? generateListHTML(item.sublist)
+              : ''
             }
           </li>
         `
-          )
-          .join('')}
+        )
+        .join('')}
       </ul>
     `;
   }
-  // console.log(generateProductInfoHTML(productInfo));
-  console.log(productInfo);
+
+  // Generate HTML and pass it to the parent component
+  useEffect(() => {
+    if (productInfo) {
+      const html = generateProductInfoHTML(productInfo);
+      onHtmlGenerated(html); // Pass the generated HTML back to the parent
+    }
+  }, [productInfo, onHtmlGenerated]);
 
   return (
     <div className={s.productScroll}>
       <div className={s.productContent}>
-        <div>
-          <div
-            dangerouslySetInnerHTML={{
-              __html: productInfo
-                ? generateProductInfoHTML(productInfo)
-                : 'No product information available.',
-            }}
-          />
-          ;
-        </div>
+        <div
+          dangerouslySetInnerHTML={{
+            __html: productInfo
+              ? generateProductInfoHTML(productInfo)
+              : 'No product information available.',
+          }}
+        />
       </div>
-
       <div className={s.productButtons}>
         <a
           href="https://cdn.shopify.com/s/files/1/0664/4275/6332/files/24X30CASEV5.00A4_1.pdf?v=1664743615"
           className={s.link}
         >
-          {}
+          Download PDF
         </a>
-
-        {/* <button onClick={openModal} className={s.button__blue}>
-          {productInfo.ContactUsButton}
-        </button> */}
-
-        <div>
-          {/* <EmailForm selectedValue={productInfo.title} /> */}
-          dsd
-        </div>
-
         <button className={s.accordion}>Specifications</button>
         <button className={s.accordion}>Shipping Info</button>
         <div className={s.social}>
-          <a href="#" className={s.share}>
-            Share
-          </a>
-          <a href="#" className={s.pin}>
-            Pin
-          </a>
+          <a href="#" className={s.share}>Share</a>
+          <a href="#" className={s.pin}>Pin</a>
         </div>
       </div>
     </div>
