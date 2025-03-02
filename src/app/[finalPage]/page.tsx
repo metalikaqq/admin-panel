@@ -1,105 +1,130 @@
-
-
-// 'use client';
-// import React, { useEffect, useState } from 'react';
-// import ProductImages from './components/ProductImages/ProductImages';
-// import ProductScroll from './components/ProductScroll/ProductScroll';
-// import s from './page.module.scss';
-// interface ProductData {
-//   productInfo: unknown; // Adjust type according to the structure of your product info
-//   productImages: string[];
-// }
-
-// const FinalPage: React.FC = () => {
-//   const [productData, setProductData] = useState<ProductData | null>(null);
-
-//   useEffect(() => {
-//     const storedData = sessionStorage.getItem('productData');
-//     if (storedData) {
-//       const parsedData = JSON.parse(storedData);
-//       setProductData(parsedData);
-//     }
-//   }, []);
-
-//   if (!productData) {
-//     return <div>Loading...</div>; // In case data is not loaded yet
-//   }
-
-//   const { productImages, productInfo } = productData;
-
-
-//   return (
-//     <div className={s.product}>
-//       {/* <div className={s.product__img_wrapper}> */}
-//       <ProductImages productImages={productImages} />
-//       <div className={s.product__info}>
-//         <ProductScroll productInfo={productInfo} />
-//         <button>
-//           Create Product
-//         </button>
-//       </div>
-//       {/* </div> */}
-//     </div>
-//   );
-// };
-
-// export default FinalPage;
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React, { useEffect, useState } from 'react';
 import ProductImages from './components/ProductImages/ProductImages';
 import ProductScroll from './components/ProductScroll/ProductScroll';
+import { useProductStore } from '@/store/useProductStore';
 import s from './page.module.scss';
 
-interface ProductData {
-  productInfo: InputField[]; // Use the InputField type from ProductInfo
-  productImages: string[];
-}
-
-interface InputField {
-  id: string;
-  type: 'geninfo' | 'productName' | 'productTitle' | 'list';
-  label: string;
-  value: string;
-  items?: ListItem[];
-}
-
-interface ListItem {
-  id: string;
-  content: string;
-  sublist?: ListItem[];
-}
-
 const FinalPage: React.FC = () => {
-  const [productData, setProductData] = useState<ProductData | null>(null);
+  const { productInfo, productImages, loadFromSessionStorage } = useProductStore();
   const [generatedHtml, setGeneratedHtml] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Cloudinary конфігурація - помістіть ці значення в .env
+  const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'your_upload_preset';
+  const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
+  const CLOUDINARY_API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
   useEffect(() => {
-    const storedData = sessionStorage.getItem('productData');
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      setProductData(parsedData);
+    // Завантаження даних із sessionStorage при першій загрузці сторінки
+    const loaded = loadFromSessionStorage();
+    setIsLoading(false);
+  }, [loadFromSessionStorage]);
+
+  const uploadImageToCloudinary = async (imageData: string): Promise<string> => {
+    // Skip empty images
+    if (!imageData) {
+      console.log('Skipping empty image');
+      return '';
     }
-  }, []);
-
-  const handleCreateProduct = async () => {
-    if (!productData) return;
-
-    // Extract all productName values from productInfo
-    const productNames = productData.productInfo
-      .filter((input) => input.type === 'productName')
-      .map((input) => input.value);
-
-    const payload = {
-      productNames, // Array of productName values
-      productImages: productData.productImages,
-      htmlContent: generatedHtml,
-    };
-
-    console.log('Creating product:', payload);
 
     try {
-      const response = await fetch('http://localhost:3000/products', {
+      // Check if the image is a valid data URL
+      if (!imageData.startsWith('data:')) {
+        console.error('Invalid image format, not a data URL:', imageData.substring(0, 30) + '...');
+        return '';
+      }
+
+      // Extract base64 data properly
+      const parts = imageData.split(';base64,');
+      if (parts.length !== 2) {
+        console.error('Invalid base64 image format');
+        return '';
+      }
+
+      const base64Data = parts[1];
+      const mimeType = parts[0].replace('data:', '');
+
+      const formData = new FormData();
+      formData.append('file', `data:${mimeType};base64,${base64Data}`);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+      console.log('Uploading to Cloudinary with preset:', CLOUDINARY_UPLOAD_PRESET);
+
+      const response = await fetch(CLOUDINARY_API_URL, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Cloudinary error response:', errorData);
+        throw new Error(`Cloudinary responded with status ${response.status}: ${JSON.stringify(errorData)}`);
+      }
+
+      const data = await response.json();
+      console.log('Successfully uploaded image to Cloudinary');
+      return data.secure_url;
+    } catch (error) {
+      console.error('Error uploading to Cloudinary:', error);
+      // Instead of throwing, return empty string to prevent Promise.all from failing completely
+      return '';
+    }
+  };
+
+  const handleCreateProduct = async () => {
+    if (!productInfo || !productImages) {
+      alert('Please add product information and images');
+      return;
+    }
+
+    // Get only valid (non-empty) images
+    const validImages = productImages.filter(img => img);
+
+    if (validImages.length === 0) {
+      alert('Please add at least one product image');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      console.log(`Attempting to upload ${validImages.length} images to Cloudinary`);
+
+      // Upload images and filter out failed uploads (empty strings)
+      const cloudinaryUrls = await Promise.all(
+        validImages.map(img => uploadImageToCloudinary(img))
+      );
+      const successfulUploads = cloudinaryUrls.filter(url => url);
+
+      console.log(`Successfully uploaded ${successfulUploads.length} of ${validImages.length} images`);
+
+      if (successfulUploads.length === 0) {
+        throw new Error('Failed to upload any images. Please check your Cloudinary configuration.');
+      }
+
+      // Get product names
+      const productNames = productInfo
+        .filter((input) => input.type === 'productName' && input.value)
+        .map((input) => input.value);
+
+      if (productNames.length === 0) {
+        throw new Error('Please add at least one product name');
+      }
+
+      // Create payload with successful uploads
+      const payload = {
+        productNames,
+        productImages: successfulUploads,
+        htmlContent: generatedHtml,
+      };
+
+      console.log('Creating product with payload:', payload);
+
+      // Send data to backend
+      const response = await fetch('http://localhost:3000/api/products', {  // Changed to relative URL
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,32 +136,42 @@ const FinalPage: React.FC = () => {
         const result = await response.json();
         console.log('Product created successfully:', result);
         alert('Product created successfully!');
+        // Optionally redirect to product list or clear form
       } else {
-        console.error('Failed to create product');
-        alert('Failed to create product. Please try again.');
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('Failed to create product', errorData);
+        alert(`Failed to create product: ${errorData.message || 'Please try again'}`);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again.');
+      console.error('Error creating product:', error);
+      alert(`An error occurred: ${error instanceof Error ? error.message : 'Please try again'}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (!productData) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  const { productImages, productInfo } = productData;
+  // Фільтруємо тільки непусті зображення перед передачею їх у компонент
+  const validImages = productImages.filter(img => img !== '');
 
   return (
     <div className={s.product}>
-      <ProductImages productImages={productImages} />
+      {/* Передаємо тільки валідні зображення */}
+      <ProductImages productImages={validImages} />
       <div className={s.product__info}>
         <ProductScroll
           productInfo={productInfo}
           onHtmlGenerated={(html: string) => setGeneratedHtml(html)}
         />
-        <button className={s.createButton} onClick={handleCreateProduct}>
-          Create Product
+        <button
+          className={s.createButton}
+          onClick={handleCreateProduct}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Creating...' : 'Create Product'}
         </button>
       </div>
     </div>

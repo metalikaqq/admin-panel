@@ -1,66 +1,70 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import s from './ProductImage.module.scss';
+import { useProductStore } from '@/store/useProductStore';
 
 // Helper function to convert image file to base64
-const toBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
     reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
   });
+};
 
 interface ProductImageProps {
   onUpdate?: (images: string[]) => void; // Optional, for passing images
-  images?: string[]; // Optional, for displaying images
 }
 
-const ProductImage: React.FC<ProductImageProps> = ({
-  onUpdate,
-  images = [],
-}) => {
-  const [selectedImages, setSelectedImages] = useState<string[]>(images);
-  const [imageCount, setImageCount] = useState(8);
+const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
+  const { productImages, updateImageAtIndex, addMoreImageSlots } = useProductStore();
+  const [imageCount, setImageCount] = useState(8); // Initial count of additional images
 
-  // Handle file input and update images as base64
-  const handleImageChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const file = event.target.files?.[0];
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
     if (file) {
-      const base64Image = await toBase64(file);
-      setSelectedImages((prevImages) => {
-        const newImages = [...prevImages];
-        newImages[index] = base64Image; // Store base64 string
-        return newImages;
-      });
+      try {
+        const base64Image = await fileToBase64(file);
+
+        // Оновлюємо зображення в нашому store
+        updateImageAtIndex(index, base64Image);
+
+        // Якщо onUpdate проп наданий, викликаємо його з оновленими зображеннями
+        if (onUpdate) {
+          // Отримуємо найновіші дані зі store безпосередньо, без setTimeout
+          const updatedImages = useProductStore.getState().productImages;
+          onUpdate(updatedImages);
+        }
+      } catch (error) {
+        console.error('Error converting image to base64:', error);
+      }
     }
   };
 
-  // Add more image inputs
   const addMoreImages = () => {
-    setImageCount((prevCount) => prevCount + 4);
+    setImageCount(prevCount => prevCount + 4);
+    addMoreImageSlots(4);
   };
 
-  // Update parent with the selected images
-  useEffect(() => {
-    if (onUpdate) {
-      onUpdate(selectedImages);
-    }
-  }, [selectedImages, onUpdate]);
+  // Підрахуємо кількість завантажених зображень для відображення користувачу
+  const uploadedCount = productImages.filter(Boolean).length;
 
   return (
     <div className={s.product__image}>
-      <h3 className={s.product__image__title}>Upload Images</h3>
+      <h3 className={s.product__image__title}>
+        Upload Images
+        <span className={s.product__image__count}>
+          ({uploadedCount} uploaded)
+        </span>
+      </h3>
       <div className={s.product__image__wrapper}>
         <div className={s.product__image__top}>
           <label className={s.product__image__label}>
-            {selectedImages[0] ? (
+            {productImages[0] ? (
               <img
-                src={selectedImages[0]}
+                src={productImages[0]}
                 alt="Main product"
                 className={s.product__image__preview}
               />
@@ -81,9 +85,9 @@ const ProductImage: React.FC<ProductImageProps> = ({
         <div className={s.product__image__bottom}>
           {[...Array(imageCount)].map((_, index) => (
             <label key={index + 1} className={s.product__image__label}>
-              {selectedImages[index + 1] ? (
+              {productImages[index + 1] ? (
                 <img
-                  src={selectedImages[index + 1]}
+                  src={productImages[index + 1]}
                   alt={`Product ${index + 1}`}
                   className={s.product__image__preview}
                 />
