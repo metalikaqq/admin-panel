@@ -135,3 +135,65 @@
   gap: 8px;
   margin-bottom: 10px;
 }
+
+.languageFields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.languageField {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.languageLabel {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 3px;
+  color: #555;
+}
+
+.languageToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #e0e0e0;
+  }
+
+  span {
+    font-weight: 500;
+  }
+}
+
+// Стилі для підсписків, оскільки у них тепер подвійний вміст
+.sublistItem {
+  padding-left: 20px;
+  margin-top: 8px;
+
+  .languageField+.languageField {
+    margin-top: 5px;
+  }
+}
+
+// Для списків також додаємо відступи
+.listItem {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}

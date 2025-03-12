@@ -1,43 +1,46 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ProductImages from './components/ProductImages/ProductImages';
 import ProductScroll from './components/ProductScroll/ProductScroll';
 import { useProductStore } from '@/store/useProductStore';
 import s from './page.module.scss';
 
 const FinalPage: React.FC = () => {
-  const { productInfo, productImages, loadFromSessionStorage } = useProductStore();
-  const [generatedHtml, setGeneratedHtml] = useState<string>('');
+  const { productInfo, productImages, loadFromSessionStorage, activeLanguage } = useProductStore();
+  const [generatedHtml, setGeneratedHtml] = useState<{ uk: string; en: string }>({ uk: '', en: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Cloudinary конфігурація - помістіть ці значення в .env
+  // Cloudinary конфігурація
   const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'your_upload_preset';
   const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
   const CLOUDINARY_API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
   useEffect(() => {
-    // Завантаження даних із sessionStorage при першій загрузці сторінки
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const loaded = loadFromSessionStorage();
     setIsLoading(false);
+    console.log('Loaded Product Info:', productInfo);
+    console.log('Active Language:', activeLanguage);
   }, [loadFromSessionStorage]);
 
+  // Використовуємо useCallback для стабілізації функції між рендерами
+  const handleHtmlGenerated = useCallback((html: { uk: string; en: string }) => {
+    setGeneratedHtml(html);
+  }, []);
+
   const uploadImageToCloudinary = async (imageData: string): Promise<string> => {
-    // Skip empty images
     if (!imageData) {
       console.log('Skipping empty image');
       return '';
     }
 
     try {
-      // Check if the image is a valid data URL
       if (!imageData.startsWith('data:')) {
         console.error('Invalid image format, not a data URL:', imageData.substring(0, 30) + '...');
         return '';
       }
 
-      // Extract base64 data properly
       const parts = imageData.split(';base64,');
       if (parts.length !== 2) {
         console.error('Invalid base64 image format');
@@ -69,7 +72,6 @@ const FinalPage: React.FC = () => {
       return data.secure_url;
     } catch (error) {
       console.error('Error uploading to Cloudinary:', error);
-      // Instead of throwing, return empty string to prevent Promise.all from failing completely
       return '';
     }
   };
@@ -80,7 +82,6 @@ const FinalPage: React.FC = () => {
       return;
     }
 
-    // Get only valid (non-empty) images
     const validImages = productImages.filter(img => img);
 
     if (validImages.length === 0) {
@@ -93,7 +94,6 @@ const FinalPage: React.FC = () => {
     try {
       console.log(`Attempting to upload ${validImages.length} images to Cloudinary`);
 
-      // Upload images and filter out failed uploads (empty strings)
       const cloudinaryUrls = await Promise.all(
         validImages.map(img => uploadImageToCloudinary(img))
       );
@@ -105,26 +105,34 @@ const FinalPage: React.FC = () => {
         throw new Error('Failed to upload any images. Please check your Cloudinary configuration.');
       }
 
-      // Get product names
-      const productNames = productInfo
-        .filter((input) => input.type === 'productName' && input.value)
-        .map((input) => input.value);
+      const productNamesUk = productInfo
+        .filter((input) => input.type === 'productName' && input.value.uk)
+        .map((input) => input.value.uk);
 
-      if (productNames.length === 0) {
-        throw new Error('Please add at least one product name');
+      const productNamesEn = productInfo
+        .filter((input) => input.type === 'productName' && input.value.en)
+        .map((input) => input.value.en);
+
+      if (productNamesUk.length === 0 && productNamesEn.length === 0) {
+        throw new Error('Please add at least one product name in either Ukrainian or English');
       }
 
-      // Create payload with successful uploads
+      // Create payload with successful uploads and both languages
       const payload = {
-        productNames,
+        productNames: {
+          uk: productNamesUk,
+          en: productNamesEn
+        },
         productImages: successfulUploads,
-        htmlContent: generatedHtml,
+        htmlContent: {
+          uk: generatedHtml.uk,
+          en: generatedHtml.en
+        }
       };
 
       console.log('Creating product with payload:', payload);
 
-      // Send data to backend
-      const response = await fetch('http://localhost:3000/api/products', {  // Changed to relative URL
+      const response = await fetch('http://localhost:3000/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +144,6 @@ const FinalPage: React.FC = () => {
         const result = await response.json();
         console.log('Product created successfully:', result);
         alert('Product created successfully!');
-        // Optionally redirect to product list or clear form
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         console.error('Failed to create product', errorData);
@@ -154,17 +161,16 @@ const FinalPage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  // Фільтруємо тільки непусті зображення перед передачею їх у компонент
   const validImages = productImages.filter(img => img !== '');
 
   return (
     <div className={s.product}>
-      {/* Передаємо тільки валідні зображення */}
       <ProductImages productImages={validImages} />
       <div className={s.product__info}>
         <ProductScroll
           productInfo={productInfo}
-          onHtmlGenerated={(html: string) => setGeneratedHtml(html)}
+          activeLanguage={activeLanguage}
+          onHtmlGenerated={handleHtmlGenerated}
         />
         <button
           className={s.createButton}

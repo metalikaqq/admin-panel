@@ -1,17 +1,23 @@
-
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import ProductInfo from '@/components/Product/ProductInfo/ProductInfo';
 import ProductImage from '@/components/Product/ProductImage/ProductImage';
-// import { useProductStore } from '@/store/useProductStore'; // Обновите путь при необходимости
+import { useProductStore } from '@/store/useProductStore';
 import s from './page.module.scss';
-// import { useRouter } from 'next/router';
 
 export default function ProductPage() {
   const router = useRouter();
+  const { productInfo, saveToSessionStorage } = useProductStore();
 
   const handleFinalLook = () => {
+    // Зберігаємо дані в sessionStorage
+    saveToSessionStorage();
+
+    // Виводимо дані в консоль для перевірки
+    console.log('Product Info:', JSON.stringify(productInfo, null, 2));
+
+    // Перенаправляємо на сторінку фінального перегляду
     router.push(`/finalPage`);
   };
 
