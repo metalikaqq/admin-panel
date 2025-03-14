@@ -27,13 +27,20 @@ interface ProductScrollProps {
   onHtmlGenerated: (htmlContent: { uk: string; en: string }) => void;
 }
 
-export default function ProductScroll({ productInfo, activeLanguage, onHtmlGenerated }: ProductScrollProps) {
+export default function ProductScroll({
+  productInfo,
+  activeLanguage,
+  onHtmlGenerated,
+}: ProductScrollProps) {
   const { setActiveLanguage } = useProductStore();
   // Використовуємо useRef для відстеження попередніх значень
   const prevProductInfoRef = useRef<string>('');
 
   // Генерація HTML для відображення на сторінці
-  function generateProductInfoHTML(productInfo: InputField[], language: 'uk' | 'en'): string {
+  function generateProductInfoHTML(
+    productInfo: InputField[],
+    language: 'uk' | 'en'
+  ): string {
     return productInfo
       .map((item) => {
         let htmlContent = '';
@@ -67,17 +74,18 @@ export default function ProductScroll({ productInfo, activeLanguage, onHtmlGener
     return `
       <ul>
         ${items
-        .map(
-          (item) => `
+          .map(
+            (item) => `
             <li>${item.content[language] || ''}
-              ${item.sublist && item.sublist.length > 0
-              ? generateListHTML(item.sublist, language)
-              : ''
-            }
+              ${
+                item.sublist && item.sublist.length > 0
+                  ? generateListHTML(item.sublist, language)
+                  : ''
+              }
             </li>
           `
-        )
-        .join('')}
+          )
+          .join('')}
       </ul>
     `;
   }
@@ -101,7 +109,7 @@ export default function ProductScroll({ productInfo, activeLanguage, onHtmlGener
     // Генеруємо HTML для обох мов
     const htmlContent = {
       uk: generateProductInfoHTML(productInfo, 'uk'),
-      en: generateProductInfoHTML(productInfo, 'en')
+      en: generateProductInfoHTML(productInfo, 'en'),
     };
 
     // Передаємо згенерований HTML назад батьківському компоненту
@@ -143,8 +151,12 @@ export default function ProductScroll({ productInfo, activeLanguage, onHtmlGener
         <button className={s.accordion}>Specifications</button>
         <button className={s.accordion}>Shipping Info</button>
         <div className={s.social}>
-          <a href="#" className={s.share}>Share</a>
-          <a href="#" className={s.pin}>Pin</a>
+          <a href="#" className={s.share}>
+            Share
+          </a>
+          <a href="#" className={s.pin}>
+            Pin
+          </a>
         </div>
       </div>
     </div>

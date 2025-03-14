@@ -10,7 +10,7 @@ const fileToBase64 = (file: File): Promise<string> => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
+    reader.onerror = (error) => reject(error);
   });
 };
 
@@ -19,10 +19,14 @@ interface ProductImageProps {
 }
 
 const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
-  const { productImages, updateImageAtIndex, addMoreImageSlots } = useProductStore();
+  const { productImages, updateImageAtIndex, addMoreImageSlots } =
+    useProductStore();
   const [imageCount, setImageCount] = useState(8); // Initial count of additional images
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handleImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
@@ -44,7 +48,7 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
   };
 
   const addMoreImages = () => {
-    setImageCount(prevCount => prevCount + 4);
+    setImageCount((prevCount) => prevCount + 4);
     addMoreImageSlots(4);
   };
 

@@ -6,14 +6,20 @@ import { useProductStore } from '@/store/useProductStore';
 import s from './page.module.scss';
 
 const FinalPage: React.FC = () => {
-  const { productInfo, productImages, loadFromSessionStorage, activeLanguage } = useProductStore();
-  const [generatedHtml, setGeneratedHtml] = useState<{ uk: string; en: string }>({ uk: '', en: '' });
+  const { productInfo, productImages, loadFromSessionStorage, activeLanguage } =
+    useProductStore();
+  const [generatedHtml, setGeneratedHtml] = useState<{
+    uk: string;
+    en: string;
+  }>({ uk: '', en: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Cloudinary конфігурація
-  const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'your_upload_preset';
-  const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
+  const CLOUDINARY_UPLOAD_PRESET =
+    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'your_upload_preset';
+  const CLOUDINARY_CLOUD_NAME =
+    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
   const CLOUDINARY_API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
   useEffect(() => {
@@ -25,11 +31,16 @@ const FinalPage: React.FC = () => {
   }, [loadFromSessionStorage]);
 
   // Використовуємо useCallback для стабілізації функції між рендерами
-  const handleHtmlGenerated = useCallback((html: { uk: string; en: string }) => {
-    setGeneratedHtml(html);
-  }, []);
+  const handleHtmlGenerated = useCallback(
+    (html: { uk: string; en: string }) => {
+      setGeneratedHtml(html);
+    },
+    []
+  );
 
-  const uploadImageToCloudinary = async (imageData: string): Promise<string> => {
+  const uploadImageToCloudinary = async (
+    imageData: string
+  ): Promise<string> => {
     if (!imageData) {
       console.log('Skipping empty image');
       return '';
@@ -37,7 +48,10 @@ const FinalPage: React.FC = () => {
 
     try {
       if (!imageData.startsWith('data:')) {
-        console.error('Invalid image format, not a data URL:', imageData.substring(0, 30) + '...');
+        console.error(
+          'Invalid image format, not a data URL:',
+          imageData.substring(0, 30) + '...'
+        );
         return '';
       }
 
@@ -54,7 +68,10 @@ const FinalPage: React.FC = () => {
       formData.append('file', `data:${mimeType};base64,${base64Data}`);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-      console.log('Uploading to Cloudinary with preset:', CLOUDINARY_UPLOAD_PRESET);
+      console.log(
+        'Uploading to Cloudinary with preset:',
+        CLOUDINARY_UPLOAD_PRESET
+      );
 
       const response = await fetch(CLOUDINARY_API_URL, {
         method: 'POST',
@@ -64,7 +81,9 @@ const FinalPage: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('Cloudinary error response:', errorData);
-        throw new Error(`Cloudinary responded with status ${response.status}: ${JSON.stringify(errorData)}`);
+        throw new Error(
+          `Cloudinary responded with status ${response.status}: ${JSON.stringify(errorData)}`
+        );
       }
 
       const data = await response.json();
@@ -82,7 +101,7 @@ const FinalPage: React.FC = () => {
       return;
     }
 
-    const validImages = productImages.filter(img => img);
+    const validImages = productImages.filter((img) => img);
 
     if (validImages.length === 0) {
       alert('Please add at least one product image');
@@ -92,17 +111,23 @@ const FinalPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      console.log(`Attempting to upload ${validImages.length} images to Cloudinary`);
+      console.log(
+        `Attempting to upload ${validImages.length} images to Cloudinary`
+      );
 
       const cloudinaryUrls = await Promise.all(
-        validImages.map(img => uploadImageToCloudinary(img))
+        validImages.map((img) => uploadImageToCloudinary(img))
       );
-      const successfulUploads = cloudinaryUrls.filter(url => url);
+      const successfulUploads = cloudinaryUrls.filter((url) => url);
 
-      console.log(`Successfully uploaded ${successfulUploads.length} of ${validImages.length} images`);
+      console.log(
+        `Successfully uploaded ${successfulUploads.length} of ${validImages.length} images`
+      );
 
       if (successfulUploads.length === 0) {
-        throw new Error('Failed to upload any images. Please check your Cloudinary configuration.');
+        throw new Error(
+          'Failed to upload any images. Please check your Cloudinary configuration.'
+        );
       }
 
       const productNamesUk = productInfo
@@ -114,20 +139,22 @@ const FinalPage: React.FC = () => {
         .map((input) => input.value.en);
 
       if (productNamesUk.length === 0 && productNamesEn.length === 0) {
-        throw new Error('Please add at least one product name in either Ukrainian or English');
+        throw new Error(
+          'Please add at least one product name in either Ukrainian or English'
+        );
       }
 
       // Create payload with successful uploads and both languages
       const payload = {
         productNames: {
           uk: productNamesUk,
-          en: productNamesEn
+          en: productNamesEn,
         },
         productImages: successfulUploads,
         htmlContent: {
           uk: generatedHtml.uk,
-          en: generatedHtml.en
-        }
+          en: generatedHtml.en,
+        },
       };
 
       console.log('Creating product with payload:', payload);
@@ -145,13 +172,19 @@ const FinalPage: React.FC = () => {
         console.log('Product created successfully:', result);
         alert('Product created successfully!');
       } else {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: 'Unknown error' }));
         console.error('Failed to create product', errorData);
-        alert(`Failed to create product: ${errorData.message || 'Please try again'}`);
+        alert(
+          `Failed to create product: ${errorData.message || 'Please try again'}`
+        );
       }
     } catch (error) {
       console.error('Error creating product:', error);
-      alert(`An error occurred: ${error instanceof Error ? error.message : 'Please try again'}`);
+      alert(
+        `An error occurred: ${error instanceof Error ? error.message : 'Please try again'}`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -161,7 +194,7 @@ const FinalPage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  const validImages = productImages.filter(img => img !== '');
+  const validImages = productImages.filter((img) => img !== '');
 
   return (
     <div className={s.product}>
