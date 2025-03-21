@@ -74,18 +74,17 @@ export default function ProductScroll({
     return `
       <ul>
         ${items
-          .map(
-            (item) => `
+        .map(
+          (item) => `
             <li>${item.content[language] || ''}
-              ${
-                item.sublist && item.sublist.length > 0
-                  ? generateListHTML(item.sublist, language)
-                  : ''
-              }
+              ${item.sublist && item.sublist.length > 0
+              ? generateListHTML(item.sublist, language)
+              : ''
+            }
             </li>
           `
-          )
-          .join('')}
+        )
+        .join('')}
       </ul>
     `;
   }
@@ -114,6 +113,7 @@ export default function ProductScroll({
 
     // Передаємо згенерований HTML назад батьківському компоненту
     onHtmlGenerated(htmlContent);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productInfo, onHtmlGenerated]);
 
   return (

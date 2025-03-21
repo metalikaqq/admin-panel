@@ -28,6 +28,7 @@ const FinalPage: React.FC = () => {
     setIsLoading(false);
     console.log('Loaded Product Info:', productInfo);
     console.log('Active Language:', activeLanguage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadFromSessionStorage]);
 
   // Використовуємо useCallback для стабілізації функції між рендерами

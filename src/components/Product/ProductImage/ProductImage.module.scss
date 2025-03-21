@@ -3,12 +3,20 @@
     margin-bottom: 15px;
     font-size: 20px;
     color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__count {
+    font-size: 16px;
+    color: #666;
   }
 
   &__wrapper {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
   }
 
   &__top {
@@ -17,11 +25,10 @@
     margin-bottom: 20px;
   }
 
-  &__bottom {
-    display: flex;
-    flex-wrap: wrap;
+  &__items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 15px;
-    justify-content: space-between;
   }
 
   &__label {
@@ -35,6 +42,7 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    transition: background-color 0.3s ease;
 
     &:hover {
       background-color: #f0f8ff;
@@ -48,6 +56,7 @@
   &__placeholder {
     color: #007bff;
     font-size: 14px;
+    text-align: center;
   }
 
   &__preview {
@@ -56,18 +65,19 @@
     object-fit: cover;
     border-radius: 10px;
   }
-}
 
-.product__image__addMoreButton {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  &__addMoreButton {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 
-  &:hover {
-    background-color: #0056b3;
+    &:hover {
+      background-color: #0056b3;
+    }
   }
 }

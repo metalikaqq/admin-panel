@@ -66,6 +66,7 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
   // При першому завантаженні компоненту синхронізуємо з Zustand
   useEffect(() => {
     setInputs(productInfo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const moveInputUp = (index: number) => {

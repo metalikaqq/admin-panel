@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import s from './ProductImage.module.scss';
 import { useProductStore } from '@/store/useProductStore';
 
@@ -19,25 +20,17 @@ interface ProductImageProps {
 }
 
 const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
-  const { productImages, updateImageAtIndex, addMoreImageSlots } =
-    useProductStore();
+  const { productImages, updateImageAtIndex, addMoreImageSlots } = useProductStore();
   const [imageCount, setImageCount] = useState(8); // Initial count of additional images
 
-  const handleImageChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
         const base64Image = await fileToBase64(file);
-
-        // Оновлюємо зображення в нашому store
         updateImageAtIndex(index, base64Image);
 
-        // Якщо onUpdate проп наданий, викликаємо його з оновленими зображеннями
         if (onUpdate) {
-          // Отримуємо найновіші дані зі store безпосередньо, без setTimeout
           const updatedImages = useProductStore.getState().productImages;
           onUpdate(updatedImages);
         }
@@ -52,30 +45,27 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
     addMoreImageSlots(4);
   };
 
-  // Підрахуємо кількість завантажених зображень для відображення користувачу
   const uploadedCount = productImages.filter(Boolean).length;
 
   return (
     <div className={s.product__image}>
       <h3 className={s.product__image__title}>
         Upload Images
-        <span className={s.product__image__count}>
-          ({uploadedCount} uploaded)
-        </span>
+        <span className={s.product__image__count}>({uploadedCount} uploaded)</span>
       </h3>
       <div className={s.product__image__wrapper}>
         <div className={s.product__image__top}>
           <label className={s.product__image__label}>
             {productImages[0] ? (
-              <img
+              <Image
                 src={productImages[0]}
                 alt="Main product"
                 className={s.product__image__preview}
+                width={140}
+                height={120}
               />
             ) : (
-              <span className={s.product__image__placeholder}>
-                Upload Main Image
-              </span>
+              <span className={s.product__image__placeholder}>Upload Main Image</span>
             )}
             <input
               className={s.product__image__input}
@@ -85,20 +75,19 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
             />
           </label>
         </div>
-
-        <div className={s.product__image__bottom}>
+        <div className={s.product__image__items}>
           {[...Array(imageCount)].map((_, index) => (
-            <label key={index + 1} className={s.product__image__label}>
+            <label key={index} className={s.product__image__label}>
               {productImages[index + 1] ? (
-                <img
+                <Image
                   src={productImages[index + 1]}
                   alt={`Product ${index + 1}`}
                   className={s.product__image__preview}
+                  width={140}
+                  height={120}
                 />
               ) : (
-                <span className={s.product__image__placeholder}>
-                  Upload Image
-                </span>
+                <span className={s.product__image__placeholder}>Upload Image</span>
               )}
               <input
                 className={s.product__image__input}
@@ -109,11 +98,7 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
             </label>
           ))}
         </div>
-
-        <button
-          className={s.product__image__addMoreButton}
-          onClick={addMoreImages}
-        >
+        <button className={s.product__image__addMoreButton} onClick={addMoreImages}>
           Add More Images
         </button>
       </div>

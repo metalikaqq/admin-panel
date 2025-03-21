@@ -41,7 +41,7 @@ function ResponsiveDrawer(props: any) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isEmailOpen, setIsEmailOpen] = React.useState(true); // Controls email section expansion
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [isLoggedIn, setIsLoggedIn] = React.useState(true); // Example login state
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false); // Example login state
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -78,14 +78,23 @@ function ResponsiveDrawer(props: any) {
         horizontal: 'right',
       }}
     >
-      {isLoggedIn ? (
-        <>
-          <MenuItem onClick={handleMenuClose}>Account</MenuItem>
-          <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
-        </>
-      ) : (
-        <MenuItem onClick={handleMenuClose}>Login</MenuItem>
-      )}
+      {
+        isLoggedIn ? (
+          [
+            <MenuItem key="account" onClick={handleMenuClose}>Account</MenuItem>,
+            <MenuItem key="logout" onClick={handleMenuClose}>Logout</MenuItem>,
+          ]
+        ) : (
+          [
+            <MenuItem key="login" onClick={handleMenuClose}>
+              <Link href="/login">Login</Link>
+            </MenuItem>,
+            <MenuItem key="register" onClick={handleMenuClose}>
+              <Link href="/register">Register</Link>
+            </MenuItem>,
+          ]
+        )
+      }
     </Menu>
   );
 
@@ -107,24 +116,6 @@ function ResponsiveDrawer(props: any) {
           </ListItemIcon>
           <ListItemText primary="Account" />
         </ListItemButton>
-
-        {/* <ListItemButton onClick={handleEmailClick}>
-          <ListItemIcon>
-            <MailIcon />
-          </ListItemIcon>
-          <ListItemText primary="Email" />
-          {isEmailOpen ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={isEmailOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton sx={{ pl: 4 }} component={Link} href="/email">
-              <ListItemIcon>
-                <MailIcon />
-              </ListItemIcon>
-              <ListItemText primary="All Email" />
-            </ListItemButton>
-          </List>
-        </Collapse> */}
 
         {/* Email section with collapsible items */}
         <ListItemButton onClick={handleEmailClick}>

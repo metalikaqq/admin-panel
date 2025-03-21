@@ -25,9 +25,12 @@ export default function ProductImages({ productImages }: ProductImagesProps) {
       <div className={s.main_image}>
         {currentImage &&
           (isBlobURL(currentImage) ? (
-            <img
+            <Image
               src={currentImage}
               alt="Main product"
+              layout="responsive"
+              width={300}
+              height={300}
               className={s.main_image__inner}
             />
           ) : (
@@ -50,9 +53,12 @@ export default function ProductImages({ productImages }: ProductImagesProps) {
             onClick={() => setCurrentImage(image)}
           >
             {isBlobURL(image) ? (
-              <img
+              <Image
                 src={image}
                 alt={`Thumbnail ${index + 1}`}
+                layout="responsive"
+                width={100}
+                height={100}
                 className={s.image}
               />
             ) : (
