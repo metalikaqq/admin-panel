@@ -1,5 +1,11 @@
 'use client';
-import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import axiosClient from '@/api/axiosClient';
@@ -31,7 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedToken = Cookies.get('accessToken');
         if (storedToken) {
           // Встановити token в axios
-          axiosClient.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          axiosClient.defaults.headers.common['Authorization'] =
+            `Bearer ${storedToken}`;
 
           // Отримати дані користувача
           try {
@@ -56,7 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           // Якщо токена немає - перенаправити на сторінку входу
           const pathname = window.location.pathname;
-          if (pathname !== '/login' && pathname !== '/register' && pathname !== '/unauthorized') {
+          if (
+            pathname !== '/login' &&
+            pathname !== '/register' &&
+            pathname !== '/unauthorized'
+          ) {
             router.push('/login');
           }
         }
@@ -100,15 +111,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      token,
-      loading,
-      error,
-      login,
-      logout,
-      checkUserRole
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        error,
+        login,
+        logout,
+        checkUserRole,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

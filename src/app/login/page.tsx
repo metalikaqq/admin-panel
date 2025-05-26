@@ -126,11 +126,7 @@ const LoginForm = () => {
           </div>
           {error && <p className={s.errorMessage}>{error}</p>}
           {success && <p className={s.successMessage}>Login successful!</p>}
-          <button
-            type="submit"
-            className={s.submitButton}
-            disabled={loading}
-          >
+          <button type="submit" className={s.submitButton} disabled={loading}>
             {loading ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
         </form>

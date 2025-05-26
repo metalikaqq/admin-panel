@@ -33,6 +33,7 @@ import Link from 'next/link';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ReportIcon from '@mui/icons-material/Report';
 import StarBorder from '@mui/icons-material/StarBorder';
+import CategoryIcon from '@mui/icons-material/Category';
 
 const drawerWidth = 240;
 
@@ -80,21 +81,21 @@ function ResponsiveDrawer(props: any) {
     >
       {isLoggedIn
         ? [
-            <MenuItem key="account" onClick={handleMenuClose}>
-              Account
-            </MenuItem>,
-            <MenuItem key="logout" onClick={handleMenuClose}>
-              Logout
-            </MenuItem>,
-          ]
+          <MenuItem key="account" onClick={handleMenuClose}>
+            Account
+          </MenuItem>,
+          <MenuItem key="logout" onClick={handleMenuClose}>
+            Logout
+          </MenuItem>,
+        ]
         : [
-            <MenuItem key="login" onClick={handleMenuClose}>
-              <Link href="/login">Login</Link>
-            </MenuItem>,
-            <MenuItem key="register" onClick={handleMenuClose}>
-              <Link href="/register">Register</Link>
-            </MenuItem>,
-          ]}
+          <MenuItem key="login" onClick={handleMenuClose}>
+            <Link href="/login">Login</Link>
+          </MenuItem>,
+          <MenuItem key="register" onClick={handleMenuClose}>
+            <Link href="/register">Register</Link>
+          </MenuItem>,
+        ]}
     </Menu>
   );
 
@@ -108,6 +109,13 @@ function ResponsiveDrawer(props: any) {
             <AddIcon />
           </ListItemIcon>
           <ListItemText primary="Product Creation" />
+        </ListItemButton>
+
+        <ListItemButton component={Link} href="/product-types">
+          <ListItemIcon>
+            <CategoryIcon />
+          </ListItemIcon>
+          <ListItemText primary="Product Types" />
         </ListItemButton>
 
         <ListItemButton component={Link} href="/account">
