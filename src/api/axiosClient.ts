@@ -1,17 +1,36 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:3000', // Base URL from environment variables
+  baseURL: 'http://localhost:3000',
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Optionally set up interceptors
+// Додати інтерсептор для додавання токена до кожного запиту
 axiosClient.interceptors.request.use((config) => {
-  // Add authentication tokens if needed
+  const token = Cookies.get('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
+
+// Додати інтерсептор для обробки помилок авторизації
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Видалити токен і перенаправити на сторінку входу
+      Cookies.remove('accessToken');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosClient;

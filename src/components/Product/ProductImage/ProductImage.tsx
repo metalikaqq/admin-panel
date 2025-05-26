@@ -20,10 +20,14 @@ interface ProductImageProps {
 }
 
 const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
-  const { productImages, updateImageAtIndex, addMoreImageSlots } = useProductStore();
+  const { productImages, updateImageAtIndex, addMoreImageSlots } =
+    useProductStore();
   const [imageCount, setImageCount] = useState(8); // Initial count of additional images
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handleImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
@@ -51,7 +55,9 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
     <div className={s.product__image}>
       <h3 className={s.product__image__title}>
         Upload Images
-        <span className={s.product__image__count}>({uploadedCount} uploaded)</span>
+        <span className={s.product__image__count}>
+          ({uploadedCount} uploaded)
+        </span>
       </h3>
       <div className={s.product__image__wrapper}>
         <div className={s.product__image__top}>
@@ -65,7 +71,9 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
                 height={120}
               />
             ) : (
-              <span className={s.product__image__placeholder}>Upload Main Image</span>
+              <span className={s.product__image__placeholder}>
+                Upload Main Image
+              </span>
             )}
             <input
               className={s.product__image__input}
@@ -87,7 +95,9 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
                   height={120}
                 />
               ) : (
-                <span className={s.product__image__placeholder}>Upload Image</span>
+                <span className={s.product__image__placeholder}>
+                  Upload Image
+                </span>
               )}
               <input
                 className={s.product__image__input}
@@ -98,7 +108,10 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
             </label>
           ))}
         </div>
-        <button className={s.product__image__addMoreButton} onClick={addMoreImages}>
+        <button
+          className={s.product__image__addMoreButton}
+          onClick={addMoreImages}
+        >
           Add More Images
         </button>
       </div>

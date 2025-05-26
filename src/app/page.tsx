@@ -1,13 +1,36 @@
-import s from './page.module.scss';
+'use client';
+import React from 'react';
+import { useAuth } from '@/context/AuthContext';
+import ProtectedRoute from '@/components/ProtectedRoute/ProtectedRoute';
 
-export default function Home() {
-  const some = 'fdfdgd';
+const HomePage = () => {
+  const { user, logout } = useAuth();
 
   return (
-    <div className={s.main}>
-      <h1>Welcome to the Home Page! {some}</h1>
-      <p>This is your main content area.</p>
-      {/* Add more content as needed */}
+    <div className="admin-dashboard">
+      <h1>Admin Dashboard</h1>
+      <p>Welcome, {user?.email}</p>
+      <div>
+        <p>User Role: {user?.role}</p>
+        <p>User ID: {user?.id}</p>
+      </div>
+
+      <div className="dashboard-content">
+        <p>This is the admin dashboard. Only admins can see this page.</p>
+      </div>
+
+      <button onClick={logout} className="logout-button">
+        Logout
+      </button>
     </div>
+  );
+};
+
+// Обгортаємо компонент в ProtectedRoute
+export default function ProtectedHomePage() {
+  return (
+    <ProtectedRoute>
+      <HomePage />
+    </ProtectedRoute>
   );
 }

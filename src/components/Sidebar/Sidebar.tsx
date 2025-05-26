@@ -78,23 +78,23 @@ function ResponsiveDrawer(props: any) {
         horizontal: 'right',
       }}
     >
-      {
-        isLoggedIn ? (
-          [
-            <MenuItem key="account" onClick={handleMenuClose}>Account</MenuItem>,
-            <MenuItem key="logout" onClick={handleMenuClose}>Logout</MenuItem>,
+      {isLoggedIn
+        ? [
+            <MenuItem key="account" onClick={handleMenuClose}>
+              Account
+            </MenuItem>,
+            <MenuItem key="logout" onClick={handleMenuClose}>
+              Logout
+            </MenuItem>,
           ]
-        ) : (
-          [
+        : [
             <MenuItem key="login" onClick={handleMenuClose}>
               <Link href="/login">Login</Link>
             </MenuItem>,
             <MenuItem key="register" onClick={handleMenuClose}>
               <Link href="/register">Register</Link>
             </MenuItem>,
-          ]
-        )
-      }
+          ]}
     </Menu>
   );
 

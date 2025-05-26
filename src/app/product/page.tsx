@@ -11,13 +11,10 @@ export default function ProductPage() {
   const { productInfo, saveToSessionStorage } = useProductStore();
 
   const handleFinalLook = () => {
-    // Зберігаємо дані в sessionStorage
     saveToSessionStorage();
 
-    // Виводимо дані в консоль для перевірки
     console.log('Product Info:', JSON.stringify(productInfo, null, 2));
 
-    // Перенаправляємо на сторінку фінального перегляду
     router.push(`/finalPage`);
   };
 

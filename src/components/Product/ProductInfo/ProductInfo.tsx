@@ -100,12 +100,12 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       items:
         type === 'list'
           ? [
-            {
-              id: Date.now().toString(),
-              content: { uk: '', en: '' },
-              sublist: [],
-            },
-          ]
+              {
+                id: Date.now().toString(),
+                content: { uk: '', en: '' },
+                sublist: [],
+              },
+            ]
           : undefined,
     };
     setInputs([...inputs, newInput]);
@@ -130,12 +130,12 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       inputs.map((input) =>
         input.id === id
           ? {
-            ...input,
-            value: {
-              ...input.value,
-              [language]: value,
-            },
-          }
+              ...input,
+              value: {
+                ...input.value,
+                [language]: value,
+              },
+            }
           : input
       )
     );
@@ -146,16 +146,16 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       inputs.map((input) =>
         input.id === id && input.items
           ? {
-            ...input,
-            items: [
-              ...input.items,
-              {
-                id: Date.now().toString(),
-                content: { uk: '', en: '' },
-                sublist: [],
-              },
-            ],
-          }
+              ...input,
+              items: [
+                ...input.items,
+                {
+                  id: Date.now().toString(),
+                  content: { uk: '', en: '' },
+                  sublist: [],
+                },
+              ],
+            }
           : input
       )
     );

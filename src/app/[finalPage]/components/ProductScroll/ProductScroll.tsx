@@ -74,17 +74,18 @@ export default function ProductScroll({
     return `
       <ul>
         ${items
-        .map(
-          (item) => `
+          .map(
+            (item) => `
             <li>${item.content[language] || ''}
-              ${item.sublist && item.sublist.length > 0
-              ? generateListHTML(item.sublist, language)
-              : ''
-            }
+              ${
+                item.sublist && item.sublist.length > 0
+                  ? generateListHTML(item.sublist, language)
+                  : ''
+              }
             </li>
           `
-        )
-        .join('')}
+          )
+          .join('')}
       </ul>
     `;
   }

@@ -1,10 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import s from './page.module.scss';
 import { signIn } from '@/api/routes/auth';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import Cookies from 'js-cookie';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -12,41 +13,63 @@ const LoginForm = () => {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+  const { login } = useAuth();
 
-  const handleSubmit = async (e: any) => {
+  // Перевірка, чи вже авторизований користувач
+  useEffect(() => {
+    const token = Cookies.get('accessToken');
+    if (token) {
+      router.push('/');
+    }
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
+    setLoading(true);
 
     try {
       const response = await signIn({ email, password });
 
-      setError('');
+      if (response.access_token && response.user) {
+        if (response.user.role !== 'ADMIN') {
+          setError('Access denied. Only administrators can log in.');
+          setLoading(false);
+          return;
+        }
 
-      if (response.user) {
+        // Зберегти дані користувача в AuthContext
+        login(response.access_token, response.user);
+
         setSuccess(true);
-        console.log('Login successful');
 
-        router.push('/');
-
+        // Перенаправлення на головну сторінку
         setTimeout(() => {
-          window.location.reload();
+          router.push('/');
         }, 500);
       } else {
         setError('Login failed. Please check your credentials and try again.');
       }
     } catch (err) {
       console.error(err);
-      setError('An unexpected error occurred. Please try again later.');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className={s.loginContainer}>
       <div className={s.formWrapper}>
-        <h1 className={s.title}>LOGIN</h1>
+        <h1 className={s.title}>ADMIN LOGIN</h1>
 
         <form className={s.form} onSubmit={handleSubmit}>
           <div>
@@ -63,6 +86,7 @@ const LoginForm = () => {
                 className={s.input}
                 placeholder="name@example.com"
                 required
+                disabled={loading}
               />
             </div>
             <div className={s.inputContainer}>
@@ -78,7 +102,8 @@ const LoginForm = () => {
                 placeholder="••••••••"
                 className={s.input}
                 required
-                autoComplete="true"
+                autoComplete="current-password"
+                disabled={loading}
               />
             </div>
           </div>
@@ -101,16 +126,13 @@ const LoginForm = () => {
           </div>
           {error && <p className={s.errorMessage}>{error}</p>}
           {success && <p className={s.successMessage}>Login successful!</p>}
-          <button type="submit" className={s.submitButton}>
-            SIGN IN
+          <button
+            type="submit"
+            className={s.submitButton}
+            disabled={loading}
+          >
+            {loading ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
-
-          <p className={s.registerText}>
-            Don’t have an account?{' '}
-            <Link href="/register" className={s.signUpLink}>
-              Sign up
-            </Link>
-          </p>
         </form>
       </div>
     </div>
