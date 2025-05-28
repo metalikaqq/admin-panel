@@ -34,6 +34,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ReportIcon from '@mui/icons-material/Report';
 import StarBorder from '@mui/icons-material/StarBorder';
 import CategoryIcon from '@mui/icons-material/Category';
+import SecurityIcon from '@mui/icons-material/Security';
 
 const drawerWidth = 240;
 
@@ -181,6 +182,13 @@ function ResponsiveDrawer(props: any) {
             <NotificationsIcon />
           </ListItemIcon>
           <ListItemText primary="Notification" />
+        </ListItemButton>
+
+        <ListItemButton component={Link} href="/sessions">
+          <ListItemIcon>
+            <SecurityIcon />
+          </ListItemIcon>
+          <ListItemText primary="User Sessions" />
         </ListItemButton>
       </List>
     </div>

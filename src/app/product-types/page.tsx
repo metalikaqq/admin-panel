@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -57,13 +57,14 @@ const ProductTypesPage: React.FC = () => {
 
   // State for form inputs
   const [newProductTypeName, setNewProductTypeName] = useState('');
-  const [currentProductType, setCurrentProductType] = useState<ProductType | null>(null);
+  const [currentProductType, setCurrentProductType] =
+    useState<ProductType | null>(null);
 
   // State for notifications
   const [notification, setNotification] = useState({
     open: false,
     message: '',
-    severity: 'success' as 'success' | 'error' | 'info' | 'warning'
+    severity: 'success' as 'success' | 'error' | 'info' | 'warning',
   });
 
   // Fetch product types on component mount
@@ -75,10 +76,31 @@ const ProductTypesPage: React.FC = () => {
   const fetchProductTypes = async () => {
     setLoading(true);
     try {
-      const response = await axios.get<ApiResponse<ProductType[]>>(`${API_BASE_URL}/product-types`);
-      setProductTypes(response.data.data || []);
+      const response = await axios.get<ApiResponse<ProductType[]>>(
+        `${API_BASE_URL}/product-types`
+      );
+
+      console.log('API Response:', response.data);
+
+      // Ensure we always have an array with valid product types
+      const data = response.data?.data;
+      if (Array.isArray(data)) {
+        // Filter out any invalid product types (missing id or name)
+        const validProductTypes = data.filter(pt => pt && pt.id && pt.name);
+
+        if (validProductTypes.length !== data.length) {
+          console.warn('Some product types were filtered out due to missing required fields');
+        }
+
+        setProductTypes(validProductTypes);
+      } else {
+        console.error('API response data is not an array:', data);
+        setProductTypes([]);
+        showNotification('Invalid response format from server', 'error');
+      }
     } catch (error) {
       console.error('Error fetching product types:', error);
+      setProductTypes([]); // Ensure productTypes is always an array
       showNotification('Failed to load product types', 'error');
     } finally {
       setLoading(false);
@@ -86,11 +108,14 @@ const ProductTypesPage: React.FC = () => {
   };
 
   // Function to show notifications
-  const showNotification = (message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
+  const showNotification = (
+    message: string,
+    severity: 'success' | 'error' | 'info' | 'warning'
+  ) => {
     setNotification({
       open: true,
       message,
-      severity
+      severity,
     });
   };
 
@@ -99,19 +124,31 @@ const ProductTypesPage: React.FC = () => {
     if (!newProductTypeName.trim()) return;
 
     try {
-      const response = await axios.post<ApiResponse<ProductType>>(`${API_BASE_URL}/product-types`, {
-        name: newProductTypeName.trim()
-      });
+      const response = await axios.post<ApiResponse<ProductType>>(
+        `${API_BASE_URL}/product-types`,
+        {
+          name: newProductTypeName.trim(),
+        }
+      );
+
+      console.log('Add product type response:', response.data);
 
       // Add the new product type to state
-      setProductTypes([...productTypes, response.data.data]);
-      setNewProductTypeName('');
-      setOpenAddDialog(false);
-      showNotification('Product type added successfully', 'success');
+      const newProductType = response.data?.data;
+      if (newProductType && newProductType.id && newProductType.name) {
+        setProductTypes(prev => [...prev, newProductType]);
+        setNewProductTypeName('');
+        setOpenAddDialog(false);
+        showNotification('Product type added successfully', 'success');
+      } else {
+        console.error('Invalid product type data:', newProductType);
+        showNotification('Invalid response from server', 'error');
+      }
     } catch (error) {
       console.error('Error adding product type:', error);
       if (axios.isAxiosError(error) && error.response) {
-        const errorMessage = error.response.data.error || 'Failed to add product type';
+        const errorMessage =
+          error.response.data?.error || 'Failed to add product type';
         showNotification(errorMessage, 'error');
       } else {
         showNotification('Failed to add product type', 'error');
@@ -130,17 +167,24 @@ const ProductTypesPage: React.FC = () => {
       );
 
       // Update the product type in state
-      setProductTypes(productTypes.map(pt =>
-        pt.id === currentProductType.id ? response.data.data : pt
-      ));
+      if (response.data?.data) {
+        setProductTypes(prev =>
+          prev.map((pt) =>
+            pt.id === currentProductType.id ? response.data.data : pt
+          )
+        );
 
-      setOpenEditDialog(false);
-      setCurrentProductType(null);
-      showNotification('Product type updated successfully', 'success');
+        setOpenEditDialog(false);
+        setCurrentProductType(null);
+        showNotification('Product type updated successfully', 'success');
+      } else {
+        showNotification('Invalid response from server', 'error');
+      }
     } catch (error) {
       console.error('Error updating product type:', error);
       if (axios.isAxiosError(error) && error.response) {
-        const errorMessage = error.response.data.error || 'Failed to update product type';
+        const errorMessage =
+          error.response.data?.error || 'Failed to update product type';
         showNotification(errorMessage, 'error');
       } else {
         showNotification('Failed to update product type', 'error');
@@ -153,17 +197,22 @@ const ProductTypesPage: React.FC = () => {
     if (!currentProductType) return;
 
     try {
-      await axios.delete<ApiResponse<ProductType>>(`${API_BASE_URL}/product-types/${currentProductType.id}`);
+      await axios.delete<ApiResponse<ProductType>>(
+        `${API_BASE_URL}/product-types/${currentProductType.id}`
+      );
 
       // Remove the product type from state
-      setProductTypes(productTypes.filter(pt => pt.id !== currentProductType.id));
+      setProductTypes(prev =>
+        prev.filter((pt) => pt.id !== currentProductType.id)
+      );
       setOpenDeleteDialog(false);
       setCurrentProductType(null);
       showNotification('Product type deleted successfully', 'success');
     } catch (error) {
       console.error('Error deleting product type:', error);
       if (axios.isAxiosError(error) && error.response) {
-        const errorMessage = error.response.data.error || 'Failed to delete product type';
+        const errorMessage =
+          error.response.data?.error || 'Failed to delete product type';
         showNotification(errorMessage, 'error');
       } else {
         showNotification('Failed to delete product type', 'error');
@@ -174,6 +223,13 @@ const ProductTypesPage: React.FC = () => {
 
   // Function to open the edit dialog
   const openEdit = (productType: ProductType) => {
+    // Ensure the product type has all required fields
+    if (!productType || !productType.id || !productType.name) {
+      console.error('Attempted to edit invalid product type:', productType);
+      showNotification('Cannot edit this item: missing required data', 'error');
+      return;
+    }
+
     setCurrentProductType({ ...productType });
     setOpenEditDialog(true);
   };
@@ -186,8 +242,17 @@ const ProductTypesPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">Product Types</Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4" component="h1">
+          Product Types
+        </Typography>
         <Button
           variant="contained"
           color="primary"
@@ -213,7 +278,7 @@ const ProductTypesPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {productTypes.length === 0 ? (
+              {!Array.isArray(productTypes) || productTypes.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={3} align="center">
                     No product types found. Add your first one!
@@ -221,9 +286,9 @@ const ProductTypesPage: React.FC = () => {
                 </TableRow>
               ) : (
                 productTypes.map((productType) => (
-                  <TableRow key={productType.id}>
-                    <TableCell>{productType.id.substring(0, 8)}...</TableCell>
-                    <TableCell>{productType.name}</TableCell>
+                  <TableRow key={productType?.id || `row-${Math.random()}`}>
+                    <TableCell>{productType?.id ? productType.id.substring(0, 8) + '...' : 'N/A'}</TableCell>
+                    <TableCell>{productType?.name || 'Unnamed Type'}</TableCell>
                     <TableCell align="right">
                       <IconButton
                         color="primary"
@@ -267,7 +332,11 @@ const ProductTypesPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
-          <Button onClick={handleAddProductType} color="primary" variant="contained">
+          <Button
+            onClick={handleAddProductType}
+            color="primary"
+            variant="contained"
+          >
             Add
           </Button>
         </DialogActions>
@@ -287,31 +356,46 @@ const ProductTypesPage: React.FC = () => {
             type="text"
             fullWidth
             value={currentProductType?.name || ''}
-            onChange={(e) => setCurrentProductType(
-              currentProductType ? { ...currentProductType, name: e.target.value } : null
-            )}
+            onChange={(e) =>
+              setCurrentProductType(
+                currentProductType
+                  ? { ...currentProductType, name: e.target.value }
+                  : null
+              )
+            }
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
-          <Button onClick={handleEditProductType} color="primary" variant="contained">
+          <Button
+            onClick={handleEditProductType}
+            color="primary"
+            variant="contained"
+          >
             Update
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Product Type Dialog */}
-      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+      >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the product type &quot;{currentProductType?.name}&quot;?
-            This action cannot be undone.
+            Are you sure you want to delete the product type &quot;
+            {currentProductType?.name}&quot;? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-          <Button onClick={handleDeleteProductType} color="error" variant="contained">
+          <Button
+            onClick={handleDeleteProductType}
+            color="error"
+            variant="contained"
+          >
             Delete
           </Button>
         </DialogActions>

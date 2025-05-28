@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
-import s from './ProductImage.module.scss';
+import { Box, Typography, Button, Paper, Grid } from '@mui/material';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { useProductStore } from '@/store/useProductStore';
+import ImagePreview from './ImagePreview';
+import ImageUpload from './ImageUpload';
 
 // Helper function to convert image file to base64
 const fileToBase64 = (file: File): Promise<string> => {
@@ -51,71 +53,75 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
 
   const uploadedCount = productImages.filter(Boolean).length;
 
+  const handleRemoveImage = (index: number) => {
+    updateImageAtIndex(index, '');
+  };
+
   return (
-    <div className={s.product__image}>
-      <h3 className={s.product__image__title}>
-        Upload Images
-        <span className={s.product__image__count}>
-          ({uploadedCount} uploaded)
-        </span>
-      </h3>
-      <div className={s.product__image__wrapper}>
-        <div className={s.product__image__top}>
-          <label className={s.product__image__label}>
-            {productImages[0] ? (
-              <Image
-                src={productImages[0]}
-                alt="Main product"
-                className={s.product__image__preview}
-                width={140}
-                height={120}
+    <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6" component="h3">
+          Product Images
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {uploadedCount} of {productImages.length} uploaded
+        </Typography>
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle2" gutterBottom>
+          Main Product Image
+        </Typography>
+        <Box>
+          {productImages[0] ? (
+            <ImagePreview
+              src={productImages[0]}
+              alt="Main product"
+              onRemove={() => handleRemoveImage(0)}
+            />
+          ) : (
+            <ImageUpload
+              index={0}
+              onSelect={handleImageChange}
+              isMain
+            />
+          )}
+        </Box>
+      </Box>
+
+      <Typography variant="subtitle2" gutterBottom>
+        Additional Images
+      </Typography>
+      <Grid container spacing={2}>
+        {[...Array(imageCount)].map((_, index) => (
+          <Grid item key={index}>
+            {productImages[index + 1] ? (
+              <ImagePreview
+                src={productImages[index + 1]}
+                alt={`Product ${index + 1}`}
+                onRemove={() => handleRemoveImage(index + 1)}
               />
             ) : (
-              <span className={s.product__image__placeholder}>
-                Upload Main Image
-              </span>
-            )}
-            <input
-              className={s.product__image__input}
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleImageChange(e, 0)}
-            />
-          </label>
-        </div>
-        <div className={s.product__image__items}>
-          {[...Array(imageCount)].map((_, index) => (
-            <label key={index} className={s.product__image__label}>
-              {productImages[index + 1] ? (
-                <Image
-                  src={productImages[index + 1]}
-                  alt={`Product ${index + 1}`}
-                  className={s.product__image__preview}
-                  width={140}
-                  height={120}
-                />
-              ) : (
-                <span className={s.product__image__placeholder}>
-                  Upload Image
-                </span>
-              )}
-              <input
-                className={s.product__image__input}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, index + 1)}
+              <ImageUpload
+                index={index + 1}
+                onSelect={handleImageChange}
               />
-            </label>
-          ))}
-        </div>
-        <button
-          className={s.product__image__addMoreButton}
+            )}
+          </Grid>
+        ))}
+      </Grid>
+
+      <Box mt={2}>
+        <Button
+          variant="outlined"
+          startIcon={<AddPhotoAlternateIcon />}
           onClick={addMoreImages}
+          size="small"
         >
-          Add More Images
-        </button>
-      </div>
-    </div>
+          Add More Image Slots
+        </Button>
+      </Box>
+    </Paper>
   );
 };
 

@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Box, Button, Alert, AlertTitle, Collapse } from '@mui/material';
 import s from './ProductInfo.module.scss';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import DeleteIcon from '@mui/icons-material/Delete';
+import ProductInfoField from './ProductInfoField';
+import { validateProductInfo, ValidationError, isFormValid } from './validation';
+
 import { useProductStore } from '@/store/useProductStore';
 
 type InputType = 'geninfo' | 'productName' | 'productTitle' | 'list';
@@ -50,17 +52,21 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
 
   // Використовуємо локальний стан для управління формою
   const [inputs, setInputs] = React.useState<InputField[]>(productInfo);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [showValidation, setShowValidation] = useState(false);
 
   // Оновлюємо Zustand store при зміні локального стану
   useEffect(() => {
     updateProductInfo(inputs);
 
+    // Validate inputs whenever they change
+    const errors = validateProductInfo(inputs);
+    setValidationErrors(errors);
+
     // Якщо передано onUpdate, викликаємо його також
     if (onUpdate) {
       onUpdate(inputs);
     }
-
-    // Логування для дебагу
   }, [inputs, updateProductInfo, onUpdate]);
 
   // При першому завантаженні компоненту синхронізуємо з Zustand
@@ -100,12 +106,12 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       items:
         type === 'list'
           ? [
-              {
-                id: Date.now().toString(),
-                content: { uk: '', en: '' },
-                sublist: [],
-              },
-            ]
+            {
+              id: Date.now().toString(),
+              content: { uk: '', en: '' },
+              sublist: [],
+            },
+          ]
           : undefined,
     };
     setInputs([...inputs, newInput]);
@@ -130,12 +136,12 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       inputs.map((input) =>
         input.id === id
           ? {
-              ...input,
-              value: {
-                ...input.value,
-                [language]: value,
-              },
-            }
+            ...input,
+            value: {
+              ...input.value,
+              [language]: value,
+            },
+          }
           : input
       )
     );
@@ -146,42 +152,66 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       inputs.map((input) =>
         input.id === id && input.items
           ? {
-              ...input,
-              items: [
-                ...input.items,
-                {
-                  id: Date.now().toString(),
-                  content: { uk: '', en: '' },
-                  sublist: [],
-                },
-              ],
-            }
+            ...input,
+            items: [
+              ...input.items,
+              {
+                id: Date.now().toString(),
+                content: { uk: '', en: '' },
+                sublist: [],
+              },
+            ],
+          }
           : input
       )
     );
   };
 
   const addSublistItem = (id: string, itemId: string) => {
-    setInputs(
-      inputs.map((input) => {
-        if (input.id === id && input.items) {
-          const updatedItems = input.items.map((item) => {
-            if (item.id === itemId) {
-              return {
-                ...item,
-                sublist: [
-                  ...(item.sublist || []),
-                  { id: Date.now().toString(), content: { uk: '', en: '' } },
-                ],
-              };
-            }
-            return item;
-          });
-          return { ...input, items: updatedItems };
-        }
-        return input;
-      })
-    );
+    try {
+      // Generate a unique ID for the new sublist item
+      const newSubItemId = `subitem_${Date.now().toString()}`;
+
+      setInputs(
+        inputs.map((input) => {
+          if (input.id === id && input.items) {
+            const updatedItems = input.items.map((item) => {
+              if (item.id === itemId) {
+                // Initialize empty sublist array if it doesn't exist
+                const currentSublist = item.sublist || [];
+
+                // Check for duplicate IDs (shouldn't happen with timestamp-based IDs, but just to be safe)
+                const isDuplicate = currentSublist.some(subItem => subItem.id === newSubItemId);
+                if (isDuplicate) {
+                  console.warn("Duplicate sublist item ID detected, generating new ID");
+                  return item; // Skip this update to avoid duplicates
+                }
+
+                // Add new sublist item with empty content
+                return {
+                  ...item,
+                  sublist: [
+                    ...currentSublist,
+                    {
+                      id: newSubItemId,
+                      content: { uk: '', en: '' }
+                    },
+                  ],
+                };
+              }
+              return item;
+            });
+            return { ...input, items: updatedItems };
+          }
+          return input;
+        })
+      );
+
+      toast.success("Sublist item added");
+    } catch (error) {
+      console.error("Error adding sublist item:", error);
+      toast.error("Failed to add sublist item");
+    }
   };
 
   const updateListItem = (
@@ -190,61 +220,49 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
     language: Language,
     value: string
   ) => {
-    setInputs(
-      inputs.map((input) => {
-        if (input.id === inputId && input.items) {
-          const updatedItems = input.items.map((item) => {
-            if (item.id === itemId) {
-              return {
-                ...item,
-                content: {
-                  ...item.content,
-                  [language]: value,
-                },
-              };
-            }
-            return item;
-          });
-          return { ...input, items: updatedItems };
-        }
-        return input;
-      })
-    );
-  };
+    try {
+      // Check if the value is a JSON string (indicates a sublist update)
+      let isSublistUpdate = false;
+      let parsedItem: ListItem | null = null;
 
-  const updateSublistItem = (
-    inputId: string,
-    itemId: string,
-    subItemId: string,
-    language: Language,
-    value: string
-  ) => {
-    setInputs(
-      inputs.map((input) => {
-        if (input.id === inputId && input.items) {
-          const updatedItems = input.items.map((item) => {
-            if (item.id === itemId && item.sublist) {
-              const updatedSublist = item.sublist.map((subItem) => {
-                if (subItem.id === subItemId) {
+      try {
+        parsedItem = JSON.parse(value);
+        isSublistUpdate = !!parsedItem && typeof parsedItem === 'object' && !!parsedItem.sublist;
+      } catch (e) {
+        // Not a JSON string, regular list item update
+        isSublistUpdate = false;
+      }
+
+      setInputs(
+        inputs.map((input) => {
+          if (input.id === inputId && input.items) {
+            const updatedItems = input.items.map((item) => {
+              if (item.id === itemId) {
+                if (isSublistUpdate && parsedItem) {
+                  // If this is a sublist update, replace the entire item
+                  return parsedItem;
+                } else {
+                  // Regular content update
                   return {
-                    ...subItem,
+                    ...item,
                     content: {
-                      ...subItem.content,
+                      ...item.content,
                       [language]: value,
                     },
                   };
                 }
-                return subItem;
-              });
-              return { ...item, sublist: updatedSublist };
-            }
-            return item;
-          });
-          return { ...input, items: updatedItems };
-        }
-        return input;
-      })
-    );
+              }
+              return item;
+            });
+            return { ...input, items: updatedItems };
+          }
+          return input;
+        })
+      );
+    } catch (error) {
+      console.error("Error updating list item:", error);
+      toast.error("Failed to update list item");
+    }
   };
 
   return (
@@ -252,199 +270,37 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       <div className={s.headerWithLanguage}>
         <h3>Product Information</h3>
       </div>
-
       <AnimatePresence>
         {inputs.map((input, index) => (
           <motion.div
             key={input.id}
-            className={s.product__name__wrapper}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             layout
             transition={{ duration: 0.3 }}
           >
-            <div className={s.arrowContainer}>
-              <button
-                className={`${s.arrowButton} ${index === 0 ? s.disabled : ''}`}
-                onClick={() => moveInputUp(index)}
-                disabled={index === 0}
-                title="Move Up"
-              >
-                <ArrowUpwardIcon />
-              </button>
-              <button
-                className={`${s.arrowButton} ${index === inputs.length - 1 ? s.disabled : ''}`}
-                onClick={() => moveInputDown(index)}
-                disabled={index === inputs.length - 1}
-                title="Move Down"
-              >
-                <ArrowDownwardIcon />
-              </button>
-            </div>
-
-            <div className={s.inputContent}>
-              <p className={s.product__name__title}>{input.label}</p>
-
-              {input.type === 'list' && input.items ? (
-                <div className={s.listContainer}>
-                  {input.items.map((item) => (
-                    <div key={item.id} className={s.listItem}>
-                      {/* Українська версія */}
-                      <div className={s.languageField}>
-                        <label className={s.languageLabel}>Ukrainian:</label>
-                        <input
-                          type="text"
-                          className={s.product__name__input}
-                          value={item.content.uk}
-                          onChange={(e) =>
-                            updateListItem(
-                              input.id,
-                              item.id,
-                              'uk',
-                              e.target.value
-                            )
-                          }
-                          placeholder="List Item (Ukrainian)"
-                        />
-                      </div>
-
-                      {/* Англійська версія */}
-                      <div className={s.languageField}>
-                        <label className={s.languageLabel}>English:</label>
-                        <input
-                          type="text"
-                          className={s.product__name__input}
-                          value={item.content.en}
-                          onChange={(e) =>
-                            updateListItem(
-                              input.id,
-                              item.id,
-                              'en',
-                              e.target.value
-                            )
-                          }
-                          placeholder="List Item (English)"
-                        />
-                      </div>
-
-                      <button
-                        onClick={() => addSublistItem(input.id, item.id)}
-                        className={s.addButton}
-                      >
-                        Add Sublist Item
-                      </button>
-
-                      {item.sublist &&
-                        item.sublist.map((subItem) => (
-                          <div key={subItem.id} className={s.sublistItem}>
-                            {/* Українська версія підпункту */}
-                            <div className={s.languageField}>
-                              <label className={s.languageLabel}>
-                                Ukrainian:
-                              </label>
-                              <input
-                                type="text"
-                                className={s.product__name__input}
-                                value={subItem.content.uk}
-                                onChange={(e) =>
-                                  updateSublistItem(
-                                    input.id,
-                                    item.id,
-                                    subItem.id,
-                                    'uk',
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="Sublist Item (Ukrainian)"
-                              />
-                            </div>
-
-                            {/* Англійська версія підпункту */}
-                            <div className={s.languageField}>
-                              <label className={s.languageLabel}>
-                                English:
-                              </label>
-                              <input
-                                type="text"
-                                className={s.product__name__input}
-                                value={subItem.content.en}
-                                onChange={(e) =>
-                                  updateSublistItem(
-                                    input.id,
-                                    item.id,
-                                    subItem.id,
-                                    'en',
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="Sublist Item (English)"
-                              />
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => addListItem(input.id)}
-                    className={s.addButton}
-                  >
-                    Add List Item
-                  </button>
-                </div>
-              ) : (
-                <div className={s.languageFields}>
-                  {/* Українська версія */}
-                  <div className={s.languageField}>
-                    <label className={s.languageLabel}>Ukrainian:</label>
-                    <input
-                      type="text"
-                      className={s.product__name__input}
-                      value={input.value.uk}
-                      onChange={(e) =>
-                        updateInputValue(input.id, 'uk', e.target.value)
-                      }
-                      placeholder={`${input.label} (Ukrainian)`}
-                    />
-                  </div>
-
-                  {/* Англійська версія */}
-                  <div className={s.languageField}>
-                    <label className={s.languageLabel}>English:</label>
-                    <input
-                      type="text"
-                      className={s.product__name__input}
-                      value={input.value.en}
-                      onChange={(e) =>
-                        updateInputValue(input.id, 'en', e.target.value)
-                      }
-                      placeholder={`${input.label} (English)`}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <button
-                className={s.deleteButton}
-                onClick={() => removeInput(input.id)}
-                title="Remove"
-              >
-                <DeleteIcon />
-              </button>
-            </div>
+            <ProductInfoField
+              input={input}
+              index={index}
+              total={inputs.length}
+              onMoveUp={() => moveInputUp(index)}
+              onMoveDown={() => moveInputDown(index)}
+              onRemove={() => removeInput(input.id)}
+              onValueChange={(lang, value) => updateInputValue(input.id, lang, value)}
+              onListItemChange={updateListItem}
+              onAddListItem={() => addListItem(input.id)}
+              onAddSublistItem={(itemId) => addSublistItem(input.id, itemId)}
+            />
           </motion.div>
         ))}
       </AnimatePresence>
-
       <div className={s.addInputWrapper}>
         <h4>Add New Field</h4>
         <button onClick={() => addInput('productName')} className={s.addButton}>
           Add Product Name
         </button>
-        <button
-          onClick={() => addInput('productTitle')}
-          className={s.addButton}
-        >
+        <button onClick={() => addInput('productTitle')} className={s.addButton}>
           Add Product Title
         </button>
         <button onClick={() => addInput('geninfo')} className={s.addButton}>
@@ -453,6 +309,26 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
         <button onClick={() => addInput('list')} className={s.addButton}>
           Add List
         </button>
+
+        {validationErrors.length > 0 && (
+          <div className={s.validationContainer}>
+            <button
+              className={s.validateButton}
+              onClick={() => setShowValidation(!showValidation)}
+            >
+              Show Validation Issues ({validationErrors.length})
+            </button>
+            {showValidation && (
+              <div className={s.errorsContainer}>
+                {validationErrors.map((error, idx) => (
+                  <div key={idx} className={s.errorItem}>
+                    {error.message}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

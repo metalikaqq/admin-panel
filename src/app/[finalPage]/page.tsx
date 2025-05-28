@@ -1,211 +1,253 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
+import { toast, ToastContainer, ToastPosition } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ProductImages from './components/ProductImages/ProductImages';
 import ProductScroll from './components/ProductScroll/ProductScroll';
 import { useProductStore } from '@/store/useProductStore';
+import { uploadMultipleImages } from '@/services/cloudinaryService';
+import {
+  createProduct,
+  validateProductData,
+  createProductPayload,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ProductPayload
+} from '@/services/productService';
 import s from './page.module.scss';
 
+// Local interfaces that are still needed for this component
+interface LocalizedContent {
+  uk: string;
+  en: string;
+}
+
 const FinalPage: React.FC = () => {
-  const { productInfo, productImages, loadFromSessionStorage, activeLanguage } =
-    useProductStore();
-  const [generatedHtml, setGeneratedHtml] = useState<{
-    uk: string;
-    en: string;
-  }>({ uk: '', en: '' });
+  const {
+    productInfo,
+    productImages,
+    loadFromSessionStorage,
+    activeLanguage,
+    selectedProductTypeId
+  } = useProductStore();
+  const [generatedHtml, setGeneratedHtml] = useState<LocalizedContent>({ uk: '', en: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [creationSuccess, setCreationSuccess] = useState(false);
 
-  // Cloudinary конфігурація
+  // Cloudinary configuration
   const CLOUDINARY_UPLOAD_PRESET =
     process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'your_upload_preset';
   const CLOUDINARY_CLOUD_NAME =
     process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
-  const CLOUDINARY_API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
+  /**
+   * Load product data from session storage when component mounts
+   */
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const loaded = loadFromSessionStorage();
     setIsLoading(false);
-    console.log('Loaded Product Info:', productInfo);
-    console.log('Active Language:', activeLanguage);
+    console.log('[FinalPage] Loaded Product Info:', productInfo);
+    console.log('[FinalPage] Selected Product Type ID:', selectedProductTypeId);
+
+    // Log more details about the product type selection
+    if (selectedProductTypeId) {
+      // Fetch product type details for better logging
+      const fetchProductTypeDetails = async () => {
+        try {
+          const response = await fetch(`http://localhost:3000/product-types/${selectedProductTypeId}`);
+          if (response.ok) {
+            const data = await response.json();
+            console.log('[FinalPage] Complete Product Type Details:', data.data);
+          }
+        } catch (error) {
+          console.error('[FinalPage] Error fetching product type details:', error);
+        }
+      };
+
+      fetchProductTypeDetails();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadFromSessionStorage]);
 
-  // Використовуємо useCallback для стабілізації функції між рендерами
+  /**
+   * Handle HTML generated from ProductScroll component
+   */
   const handleHtmlGenerated = useCallback(
     (html: { uk: string; en: string }) => {
       setGeneratedHtml(html);
+      console.log('[FinalPage] HTML content generated');
     },
     []
   );
 
-  const uploadImageToCloudinary = async (
-    imageData: string
-  ): Promise<string> => {
-    if (!imageData) {
-      console.log('Skipping empty image');
-      return '';
-    }
+  /**
+   * Display a notification toast
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const showNotification = (message: string, type: 'success' | 'error' | 'info') => {
+    const options = {
+      position: 'top-right' as ToastPosition,
+      autoClose: 5000,
+    };
 
-    try {
-      if (!imageData.startsWith('data:')) {
-        console.error(
-          'Invalid image format, not a data URL:',
-          imageData.substring(0, 30) + '...'
-        );
-        return '';
-      }
-
-      const parts = imageData.split(';base64,');
-      if (parts.length !== 2) {
-        console.error('Invalid base64 image format');
-        return '';
-      }
-
-      const base64Data = parts[1];
-      const mimeType = parts[0].replace('data:', '');
-
-      const formData = new FormData();
-      formData.append('file', `data:${mimeType};base64,${base64Data}`);
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-      console.log(
-        'Uploading to Cloudinary with preset:',
-        CLOUDINARY_UPLOAD_PRESET
-      );
-
-      const response = await fetch(CLOUDINARY_API_URL, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Cloudinary error response:', errorData);
-        throw new Error(
-          `Cloudinary responded with status ${response.status}: ${JSON.stringify(errorData)}`
-        );
-      }
-
-      const data = await response.json();
-      console.log('Successfully uploaded image to Cloudinary');
-      return data.secure_url;
-    } catch (error) {
-      console.error('Error uploading to Cloudinary:', error);
-      return '';
+    switch (type) {
+      case 'success':
+        toast.success(message, options);
+        break;
+      case 'error':
+        toast.error(message, options);
+        break;
+      case 'info':
+        toast.info(message, options);
+        break;
     }
   };
 
+  /**
+   * Handle product creation
+   * This function validates the product data, uploads images to Cloudinary,
+   * and sends the product data to the backend API
+   */
   const handleCreateProduct = async () => {
-    if (!productInfo || !productImages) {
-      alert('Please add product information and images');
+    // Validate product data using service function
+    const validationResult = validateProductData(productInfo, productImages, selectedProductTypeId);
+    if (!validationResult.valid) {
+      toast.error(validationResult.message);
       return;
     }
 
+    // Get valid images (filter out empty strings)
     const validImages = productImages.filter((img) => img);
 
-    if (validImages.length === 0) {
-      alert('Please add at least one product image');
-      return;
-    }
-
     setIsSubmitting(true);
+    console.log('[FinalPage] Starting product creation process');
+    console.log('[FinalPage] Selected product type ID:', selectedProductTypeId);
 
     try {
-      console.log(
-        `Attempting to upload ${validImages.length} images to Cloudinary`
+      // Upload images to Cloudinary using service function
+      const successfulUploads = await uploadMultipleImages(
+        validImages,
+        CLOUDINARY_UPLOAD_PRESET,
+        CLOUDINARY_CLOUD_NAME
       );
 
-      const cloudinaryUrls = await Promise.all(
-        validImages.map((img) => uploadImageToCloudinary(img))
+      // Create product payload using service function
+      // This will throw an error if the product type is null, but our validation ensures it's not
+      const payload = createProductPayload(
+        productInfo,
+        selectedProductTypeId as string,
+        successfulUploads,
+        generatedHtml
       );
-      const successfulUploads = cloudinaryUrls.filter((url) => url);
 
-      console.log(
-        `Successfully uploaded ${successfulUploads.length} of ${validImages.length} images`
-      );
+      // Detailed product information logs
+      console.log('[FinalPage] Creating product with productType ID:', payload.productTypeId);
 
-      if (successfulUploads.length === 0) {
-        throw new Error(
-          'Failed to upload any images. Please check your Cloudinary configuration.'
-        );
-      }
-
-      const productNamesUk = productInfo
-        .filter((input) => input.type === 'productName' && input.value.uk)
-        .map((input) => input.value.uk);
-
-      const productNamesEn = productInfo
-        .filter((input) => input.type === 'productName' && input.value.en)
-        .map((input) => input.value.en);
-
-      if (productNamesUk.length === 0 && productNamesEn.length === 0) {
-        throw new Error(
-          'Please add at least one product name in either Ukrainian or English'
-        );
-      }
-
-      // Create payload with successful uploads and both languages
-      const payload = {
+      // Log detailed product information
+      console.log('[FinalPage] Complete Product Details:', {
+        productTypeId: payload.productTypeId,
         productNames: {
-          uk: productNamesUk,
-          en: productNamesEn,
+          uk: payload.productNames.uk,
+          en: payload.productNames.en
         },
-        productImages: successfulUploads,
+        // Don't log full image URLs for security/brevity
+        imagesCount: payload.productImages.length,
+        imageUrls: payload.productImages.map(url => url.substring(0, 50) + '...'),
         htmlContent: {
-          uk: generatedHtml.uk,
-          en: generatedHtml.en,
-        },
-      };
-
-      console.log('Creating product with payload:', payload);
-
-      const response = await fetch('http://localhost:3000/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+          uk: payload.htmlContent.uk.substring(0, 100) + '...',
+          en: payload.htmlContent.en.substring(0, 100) + '...'
+        }
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Product created successfully:', result);
-        alert('Product created successfully!');
-      } else {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: 'Unknown error' }));
-        console.error('Failed to create product', errorData);
-        alert(
-          `Failed to create product: ${errorData.message || 'Please try again'}`
-        );
-      }
-    } catch (error) {
-      console.error('Error creating product:', error);
-      alert(
-        `An error occurred: ${error instanceof Error ? error.message : 'Please try again'}`
+      // Product info structure debugging
+      console.log('[FinalPage] Product Info Structure:',
+        productInfo.map(info => ({
+          id: info.id,
+          type: info.type,
+          label: info.label,
+          valueLength: {
+            uk: info.value.uk.length,
+            en: info.value.en.length
+          },
+          itemsCount: info.items?.length || 0
+        }))
       );
+
+      // Create product using service function
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await createProduct<any>(payload);
+
+      // Log detailed summary of created product 
+      console.log('[FinalPage] Product created successfully:', result);
+
+      // Log complete product creation summary with all info
+      console.log('[FinalPage] COMPLETE PRODUCT CREATION SUMMARY', {
+        timestamp: new Date().toISOString(),
+        productType: {
+          id: selectedProductTypeId,
+          // We would normally fetch the product type name here, but for brevity we're omitting that
+        },
+        productNames: payload.productNames,
+        productImages: {
+          count: payload.productImages.length,
+          urls: payload.productImages.map(url => url.substring(0, 30) + '...')
+        },
+        htmlContentSizes: {
+          uk: payload.htmlContent.uk.length,
+          en: payload.htmlContent.en.length
+        },
+        responseFromServer: result
+      });
+
+      toast.success('Product created successfully!');
+      setCreationSuccess(true);
+
+      // Optional: Redirect to products list or clear the form
+      // window.location.href = '/products';
+
+    } catch (error) {
+      console.error('[FinalPage] Error in product creation:', error);
+      toast.error(`Failed to create product: ${error instanceof Error ? error.message : 'Please try again'}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  /**
+   * Display loading state while retrieving data
+   */
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
+  // Filter out empty images
   const validImages = productImages.filter((img) => img !== '');
 
   return (
     <div className={s.product}>
+      {/* Toast container for notifications */}
+      <ToastContainer position="top-right" />
+
+      {/* Product images section */}
       <ProductImages productImages={validImages} />
+
+      {/* Product info section */}
       <div className={s.product__info}>
         <ProductScroll
           productInfo={productInfo}
           activeLanguage={activeLanguage}
           onHtmlGenerated={handleHtmlGenerated}
         />
+
+        {/* Success message for product creation */}
+        {creationSuccess && (
+          <div className={s.successMessage}>
+            Product was successfully created!
+          </div>
+        )}
+
+        {/* Create product button */}
         <button
           className={s.createButton}
           onClick={handleCreateProduct}

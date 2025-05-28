@@ -27,6 +27,16 @@
   }
 }
 
+.successMessage {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+}
+
 .createButton {
   margin-top: 20px;
   padding: 10px 20px;
@@ -39,5 +49,10 @@
 
   &:hover {
     background-color: #333;
+  }
+
+  &:disabled {
+    background-color: #666;
+    cursor: not-allowed;
   }
 }

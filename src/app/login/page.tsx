@@ -2,57 +2,71 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import s from './page.module.scss';
-import { signIn } from '@/api/routes/auth';
+import { authService } from '@/services/authService';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Cookies from 'js-cookie';
+import { Alert, Box } from '@mui/material';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
+  const [sessionTimeoutMessage, setSessionTimeoutMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
   const { login } = useAuth();
 
-  // Перевірка, чи вже авторизований користувач
+  // Check for existing session and session timeout
   useEffect(() => {
     const token = Cookies.get('accessToken');
     if (token) {
       router.push('/');
+    }
+
+    // Check if session timed out
+    const sessionTimedOut = sessionStorage.getItem('sessionTimedOut');
+    if (sessionTimedOut === 'true') {
+      setSessionTimeoutMessage('Your session has expired. Please log in again.');
+      sessionStorage.removeItem('sessionTimedOut');
     }
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSessionTimeoutMessage('');
     setSuccess(false);
     setLoading(true);
 
     try {
-      const response = await signIn({ email, password });
+      const response = await authService.login({ email, password });
 
-      if (response.access_token && response.user) {
-        if (response.user.role !== 'ADMIN') {
+      if (response.success && response.data) {
+        const { access_token, user } = response.data;
+
+        if (user.role !== 'ADMIN') {
           setError('Access denied. Only administrators can log in.');
           setLoading(false);
           return;
         }
 
-        // Зберегти дані користувача в AuthContext
-        login(response.access_token, response.user);
-
+        // Save user data in AuthContext
+        login(access_token, user);
         setSuccess(true);
 
-        // Перенаправлення на головну сторінку
+        // Store initial activity timestamp for session management
+        localStorage.setItem('lastActivityTime', Date.now().toString());
+
+        // Redirect to home page
         setTimeout(() => {
           router.push('/');
         }, 500);
       } else {
-        setError('Login failed. Please check your credentials and try again.');
+        setError(response.error || 'Login failed. Please check your credentials and try again.');
       }
     } catch (err) {
       console.error(err);
@@ -70,6 +84,12 @@ const LoginForm = () => {
     <div className={s.loginContainer}>
       <div className={s.formWrapper}>
         <h1 className={s.title}>ADMIN LOGIN</h1>
+
+        {sessionTimeoutMessage && (
+          <Box mb={3}>
+            <Alert severity="warning">{sessionTimeoutMessage}</Alert>
+          </Box>
+        )}
 
         <form className={s.form} onSubmit={handleSubmit}>
           <div>

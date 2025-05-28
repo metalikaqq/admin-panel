@@ -1,38 +1,47 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import ProductInfo from '@/components/Product/ProductInfo/ProductInfo';
-import ProductImage from '@/components/Product/ProductImage/ProductImage';
+import { Container, Box, Typography, Button, useMediaQuery } from '@mui/material';
+import { theme } from '@/theme';
+import ProductStepper from '@/components/Product/ProductStepper/ProductStepper';
 import { useProductStore } from '@/store/useProductStore';
 import s from './page.module.scss';
 
 export default function ProductPage() {
   const router = useRouter();
   const { productInfo, saveToSessionStorage } = useProductStore();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleFinalLook = () => {
     saveToSessionStorage();
-
     console.log('Product Info:', JSON.stringify(productInfo, null, 2));
-
     router.push(`/finalPage`);
   };
 
   return (
-    <div className={s.main}>
-      <div className={s.leftSection}>
-        <div className={s.header}>
-          <h1 className={s.main__name}>Add New Product</h1>
-        </div>
-        <ProductInfo />
-      </div>
+    <Container maxWidth="lg" className={s.container}>
+      <Box className={s.header} mb={4}>
+        <Typography variant="h4" component="h1" className={s.main__name}>
+          Add New Product
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Create a new product by filling out the information below
+        </Typography>
+      </Box>
 
-      <div className={s.rightSection}>
-        <ProductImage />
-        <button className={s.main__add__product} onClick={handleFinalLook}>
-          Final Look
-        </button>
-      </div>
-    </div>
+      <ProductStepper />
+
+      <Box mt={3} display="flex" justifyContent="flex-end">
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={handleFinalLook}
+          fullWidth={isMobile}
+        >
+          Preview Final Product
+        </Button>
+      </Box>
+    </Container>
   );
 }

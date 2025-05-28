@@ -34,6 +34,9 @@ interface ProductState {
   // Інформація про продукт
   productInfo: InputField[];
 
+  // Вибраний тип продукту
+  selectedProductTypeId: string | null;
+
   // Дії для зображень
   setProductImages: (images: string[]) => void;
   updateImageAtIndex: (index: number, image: string) => void;
@@ -46,6 +49,9 @@ interface ProductState {
   setProductInfo: (info: InputField[]) => void;
   updateProductInfo: (newInfo: InputField[]) => void;
 
+  // Дії для типу продукту
+  setSelectedProductTypeId: (id: string) => void;
+
   // Дія для збереження всіх даних в sessionStorage
   saveToSessionStorage: () => void;
   loadFromSessionStorage: () => boolean;
@@ -55,6 +61,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
   productImages: Array(9).fill(''), // Ініціалізуємо з 9 пустими слотами
 
   activeLanguage: 'uk', // За замовчуванням українська мова для перегляду
+
+  selectedProductTypeId: null, // Початкове значення для вибраного типу продукту
 
   productInfo: [
     {
@@ -100,14 +108,27 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }),
 
   // Дії для інформації про продукт
-  setProductInfo: (info) => set({ productInfo: info }),
+  setProductInfo: (info: InputField[]) => set({ productInfo: info }),
 
-  updateProductInfo: (newInfo) => set({ productInfo: newInfo }),
+  updateProductInfo: (newInfo: InputField[]) => set({ productInfo: newInfo }),
+
+  // Дія для типу продукту
+  setSelectedProductTypeId: (id) => set({ selectedProductTypeId: id }),
 
   // Збереження всіх даних в sessionStorage
   saveToSessionStorage: () => {
-    const { productImages, productInfo, activeLanguage } = get();
-    const productData = { productImages, productInfo, activeLanguage };
+    const {
+      productImages,
+      productInfo,
+      activeLanguage,
+      selectedProductTypeId,
+    } = get();
+    const productData = {
+      productImages,
+      productInfo,
+      activeLanguage,
+      selectedProductTypeId,
+    };
     sessionStorage.setItem('productData', JSON.stringify(productData));
   },
 
@@ -143,6 +164,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
           productImages: parsedData.productImages || Array(9).fill(''),
           productInfo: parsedData.productInfo || [],
           activeLanguage: parsedData.activeLanguage || 'uk',
+          selectedProductTypeId: parsedData.selectedProductTypeId || null,
         });
         return true;
       } catch (error) {
