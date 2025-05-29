@@ -86,6 +86,7 @@ export const apiPost = async <T, R>(
       ...response.data,
       success: true,
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error(`[ApiService] Error in POST request to ${endpoint}:`, error);
     return {

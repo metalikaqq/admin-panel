@@ -35,15 +35,21 @@ import ReportIcon from '@mui/icons-material/Report';
 import StarBorder from '@mui/icons-material/StarBorder';
 import CategoryIcon from '@mui/icons-material/Category';
 import SecurityIcon from '@mui/icons-material/Security';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { useAuth } from '@/context/AuthContext';
+import { CircularProgress, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Skeleton, Fade, LinearProgress } from '@mui/material';
 
 const drawerWidth = 240;
 
 function ResponsiveDrawer(props: any) {
-  const { window, children } = props;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { window, children } = props; const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isEmailOpen, setIsEmailOpen] = React.useState(true); // Controls email section expansion
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false); // Example login state
+  const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false);
+  // Use actual authentication state and functions
+  const { user, logout: handleLogout, loading } = useAuth();
+  const isLoggedIn = !!user; // Check if user exists
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -56,9 +62,25 @@ function ResponsiveDrawer(props: any) {
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleAccountClick = () => {
+    handleMenuClose();
+    // Navigation to account page is handled by Next.js Link component
+  }; const handleLogoutClick = () => {
+    handleMenuClose();
+    setLogoutDialogOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    setLogoutDialogOpen(false);
+    handleLogout();
+  };
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogOpen(false);
   };
 
   const menuId = 'primary-search-account-menu';
@@ -78,118 +100,142 @@ function ResponsiveDrawer(props: any) {
       transformOrigin={{
         vertical: 'top',
         horizontal: 'right',
-      }}
-    >
+      }}    >
       {isLoggedIn
         ? [
-          <MenuItem key="account" onClick={handleMenuClose}>
-            Account
+          <MenuItem key="account" onClick={handleAccountClick}>
+            <Link href="/account" style={{ textDecoration: 'none', color: 'inherit' }}>
+              Account
+            </Link>
           </MenuItem>,
-          <MenuItem key="logout" onClick={handleMenuClose}>
+          <MenuItem key="logout" onClick={handleLogoutClick}>
             Logout
           </MenuItem>,
         ]
         : [
           <MenuItem key="login" onClick={handleMenuClose}>
-            <Link href="/login">Login</Link>
+            <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
+              Login
+            </Link>
           </MenuItem>,
           <MenuItem key="register" onClick={handleMenuClose}>
-            <Link href="/register">Register</Link>
+            <Link href="/register" style={{ textDecoration: 'none', color: 'inherit' }}>
+              Register
+            </Link>
           </MenuItem>,
         ]}
     </Menu>
   );
-
   const drawer = (
     <div>
       <Toolbar />
       <Divider />
-      <List>
-        <ListItemButton component={Link} href="/product">
-          <ListItemIcon>
-            <AddIcon />
-          </ListItemIcon>
-          <ListItemText primary="Product Creation" />
-        </ListItemButton>
+      <List>        {/* Public menu items - always visible */}
+        {!isLoggedIn && (
+          <>
+            <ListItemButton component={Link} href="/login">
+              <ListItemIcon>
+                <LoginIcon />
+              </ListItemIcon>
+              <ListItemText primary="Login" />
+            </ListItemButton>
+            <ListItemButton component={Link} href="/register">
+              <ListItemIcon>
+                <PersonAddIcon />
+              </ListItemIcon>
+              <ListItemText primary="Register" />
+            </ListItemButton>
+          </>
+        )}
 
-        <ListItemButton component={Link} href="/product-types">
-          <ListItemIcon>
-            <CategoryIcon />
-          </ListItemIcon>
-          <ListItemText primary="Product Types" />
-        </ListItemButton>
+        {/* Protected menu items - only for logged-in users */}
+        {isLoggedIn && (
+          <>
+            <ListItemButton component={Link} href="/product">
+              <ListItemIcon>
+                <AddIcon />
+              </ListItemIcon>
+              <ListItemText primary="Product Creation" />
+            </ListItemButton>
 
-        <ListItemButton component={Link} href="/account">
-          <ListItemIcon>
-            <AccountCircle />
-          </ListItemIcon>
-          <ListItemText primary="Account" />
-        </ListItemButton>
+            <ListItemButton component={Link} href="/product-types">
+              <ListItemIcon>
+                <CategoryIcon />
+              </ListItemIcon>
+              <ListItemText primary="Product Types" />
+            </ListItemButton>
 
-        {/* Email section with collapsible items */}
-        <ListItemButton onClick={handleEmailClick}>
-          <ListItemIcon>
-            <MailIcon />
-          </ListItemIcon>
-          <ListItemText primary="Email" />
-          {isEmailOpen ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={isEmailOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton sx={{ pl: 4 }} component={Link} href="/email">
+            <ListItemButton component={Link} href="/account">
+              <ListItemIcon>
+                <AccountCircle />
+              </ListItemIcon>
+              <ListItemText primary="Account" />
+            </ListItemButton>
+
+            {/* Email section with collapsible items */}
+            <ListItemButton onClick={handleEmailClick}>
               <ListItemIcon>
                 <MailIcon />
               </ListItemIcon>
-              <ListItemText primary="All Email" />
+              <ListItemText primary="Email" />
+              {isEmailOpen ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
+            <Collapse in={isEmailOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                <ListItemButton sx={{ pl: 4 }} component={Link} href="/email">
+                  <ListItemIcon>
+                    <MailIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="All Email" />
+                </ListItemButton>
 
-            <ListItemButton sx={{ pl: 4 }} component={Link} href="/email/trash">
+                <ListItemButton sx={{ pl: 4 }} component={Link} href="/email/trash">
+                  <ListItemIcon>
+                    <DeleteForeverIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Trash" />
+                </ListItemButton>
+
+                <ListItemButton sx={{ pl: 4 }} component={Link} href="/email/spam">
+                  <ListItemIcon>
+                    <ReportIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Spam" />
+                </ListItemButton>
+
+                <ListItemButton
+                  sx={{ pl: 4 }}
+                  component={Link}
+                  href="/email/selected"
+                >
+                  <ListItemIcon>
+                    <StarBorder />
+                  </ListItemIcon>
+                  <ListItemText primary="Selected" />
+                </ListItemButton>
+              </List>
+            </Collapse>
+
+            <ListItemButton component={Link} href="/statistics">
               <ListItemIcon>
-                <DeleteForeverIcon />
+                <BarChartIcon />
               </ListItemIcon>
-              <ListItemText primary="Trash" />
+              <ListItemText primary="Statistics" />
             </ListItemButton>
 
-            <ListItemButton sx={{ pl: 4 }} component={Link} href="/email/spam">
+            <ListItemButton component={Link} href="/notification">
               <ListItemIcon>
-                <ReportIcon />
+                <NotificationsIcon />
               </ListItemIcon>
-              <ListItemText primary="Spam" />
-            </ListItemButton>
-
-            <ListItemButton
-              sx={{ pl: 4 }}
-              component={Link}
-              href="/email/selected"
-            >
+              <ListItemText primary="Notification" />
+            </ListItemButton>            <ListItemButton component={Link} href="/sessions">
               <ListItemIcon>
-                <StarBorder />
+                <SecurityIcon />
               </ListItemIcon>
-              <ListItemText primary="Selected" />
+              <ListItemText primary="User Sessions" />
             </ListItemButton>
-          </List>
-        </Collapse>
-
-        <ListItemButton component={Link} href="/statistics">
-          <ListItemIcon>
-            <BarChartIcon />
-          </ListItemIcon>
-          <ListItemText primary="Statistics" />
-        </ListItemButton>
-
-        <ListItemButton component={Link} href="/notification">
-          <ListItemIcon>
-            <NotificationsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Notification" />
-        </ListItemButton>
-
-        <ListItemButton component={Link} href="/sessions">
-          <ListItemIcon>
-            <SecurityIcon />
-          </ListItemIcon>
-          <ListItemText primary="User Sessions" />
-        </ListItemButton>
+          </>
+        )}
       </List>
     </div>
   );
@@ -216,28 +262,50 @@ function ResponsiveDrawer(props: any) {
             sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          </IconButton>          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Admin Panel
-          </Typography>
-          <IconButton
-            size="large"
-            aria-label="show 4 new mails"
-            color="inherit"
-          >
-            <Badge badgeContent={4} color="error">
-              <MailIcon />
-            </Badge>
-          </IconButton>
-          <IconButton
-            size="large"
-            aria-label="show 17 new notifications"
-            color="inherit"
-          >
-            <Badge badgeContent={17} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+          </Typography>          {/* User info display */}
+          {loading && (
+            <CircularProgress size={20} color="inherit" sx={{ mr: 2 }} />
+          )}
+          {isLoggedIn && user && (
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', mr: 2 }}>
+              <Typography variant="body2" sx={{ mr: 1 }}>
+                Welcome, {user.email}
+              </Typography>
+              <Chip
+                label={user.role}
+                size="small"
+                color={user.role === 'ADMIN' ? 'primary' : 'default'}
+                variant="outlined"
+              />
+            </Box>
+          )}
+
+          {/* Notifications and mail - only for logged-in users */}
+          {isLoggedIn && (
+            <>
+              <IconButton
+                size="large"
+                aria-label="show 4 new mails"
+                color="inherit"
+              >
+                <Badge badgeContent={4} color="error">
+                  <MailIcon />
+                </Badge>
+              </IconButton>
+              <IconButton
+                size="large"
+                aria-label="show 17 new notifications"
+                color="inherit"
+              >
+                <Badge badgeContent={17} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </>
+          )}
+
           <IconButton
             size="large"
             edge="end"
@@ -300,10 +368,34 @@ function ResponsiveDrawer(props: any) {
         }}
       >
         <Toolbar />
-        {children}
-      </Box>
+        {children}      </Box>
 
       {renderMenu}
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        open={logoutDialogOpen}
+        onClose={handleLogoutCancel}
+        aria-labelledby="logout-dialog-title"
+        aria-describedby="logout-dialog-description"
+      >
+        <DialogTitle id="logout-dialog-title">
+          Confirm Logout
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="logout-dialog-description">
+            Are you sure you want to logout? You will need to login again to access the admin panel.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleLogoutCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleLogoutConfirm} color="primary" autoFocus>
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -8,6 +8,7 @@ interface CacheItem<T> {
 }
 
 class ApiCacheService {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private cache: Map<string, CacheItem<any>> = new Map();
   private defaultTTL: number = 5 * 60 * 1000; // 5 minutes in milliseconds
 
