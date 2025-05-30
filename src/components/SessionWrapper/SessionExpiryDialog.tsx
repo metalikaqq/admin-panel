@@ -9,7 +9,7 @@ import {
   DialogActions,
   Box,
   LinearProgress,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Button } from '@/components/UI/Button';
 import { getRemainingSessionTime } from '@/services/sessionService';
@@ -23,7 +23,7 @@ interface SessionExpiryDialogProps {
 export const SessionExpiryDialog: React.FC<SessionExpiryDialogProps> = ({
   onExtendSession,
   onLogout,
-  warningThreshold = 5 * 60 * 1000 // 5 minutes
+  warningThreshold = 5 * 60 * 1000, // 5 minutes
 }) => {
   const [open, setOpen] = useState(false);
   const [countdown, setCountdown] = useState(warningThreshold);
@@ -107,8 +107,8 @@ export const SessionExpiryDialog: React.FC<SessionExpiryDialogProps> = ({
       sx={{
         '& .MuiDialog-paper': {
           borderRadius: '12px',
-          width: { xs: '90%', sm: '450px' }
-        }
+          width: { xs: '90%', sm: '450px' },
+        },
       }}
     >
       <DialogTitle sx={{ pb: 1 }}>
@@ -119,12 +119,15 @@ export const SessionExpiryDialog: React.FC<SessionExpiryDialogProps> = ({
       <DialogContent>
         <DialogContentText component="div">
           <Typography variant="body1" gutterBottom>
-            Your session will expire soon due to inactivity. Would you like to continue working?
+            Your session will expire soon due to inactivity. Would you like to
+            continue working?
           </Typography>
 
           <Box mt={3} mb={1}>
             <Box display="flex" justifyContent="space-between" mb={1}>
-              <Typography variant="body2" color="textSecondary">Session expires in:</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Session expires in:
+              </Typography>
               <Typography variant="body2" fontWeight={600}>
                 {formatTime(countdown)}
               </Typography>
@@ -137,19 +140,16 @@ export const SessionExpiryDialog: React.FC<SessionExpiryDialogProps> = ({
                 borderRadius: 4,
                 backgroundColor: 'rgba(0,0,0,0.1)',
                 '& .MuiLinearProgress-bar': {
-                  backgroundColor: progress < 30 ? 'error.main' : 'primary.main'
-                }
+                  backgroundColor:
+                    progress < 30 ? 'error.main' : 'primary.main',
+                },
               }}
             />
           </Box>
         </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ p: 3, pt: 2 }}>
-        <Button
-          label="Logout"
-          variant="secondary"
-          onClick={onLogout}
-        />
+        <Button label="Logout" variant="secondary" onClick={onLogout} />
         <Button
           label="Continue Session"
           variant="primary"

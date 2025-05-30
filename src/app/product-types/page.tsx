@@ -86,10 +86,12 @@ const ProductTypesPage: React.FC = () => {
       const data = response.data?.data;
       if (Array.isArray(data)) {
         // Filter out any invalid product types (missing id or name)
-        const validProductTypes = data.filter(pt => pt && pt.id && pt.name);
+        const validProductTypes = data.filter((pt) => pt && pt.id && pt.name);
 
         if (validProductTypes.length !== data.length) {
-          console.warn('Some product types were filtered out due to missing required fields');
+          console.warn(
+            'Some product types were filtered out due to missing required fields'
+          );
         }
 
         setProductTypes(validProductTypes);
@@ -136,7 +138,7 @@ const ProductTypesPage: React.FC = () => {
       // Add the new product type to state
       const newProductType = response.data?.data;
       if (newProductType && newProductType.id && newProductType.name) {
-        setProductTypes(prev => [...prev, newProductType]);
+        setProductTypes((prev) => [...prev, newProductType]);
         setNewProductTypeName('');
         setOpenAddDialog(false);
         showNotification('Product type added successfully', 'success');
@@ -168,7 +170,7 @@ const ProductTypesPage: React.FC = () => {
 
       // Update the product type in state
       if (response.data?.data) {
-        setProductTypes(prev =>
+        setProductTypes((prev) =>
           prev.map((pt) =>
             pt.id === currentProductType.id ? response.data.data : pt
           )
@@ -202,7 +204,7 @@ const ProductTypesPage: React.FC = () => {
       );
 
       // Remove the product type from state
-      setProductTypes(prev =>
+      setProductTypes((prev) =>
         prev.filter((pt) => pt.id !== currentProductType.id)
       );
       setOpenDeleteDialog(false);
@@ -287,7 +289,11 @@ const ProductTypesPage: React.FC = () => {
               ) : (
                 productTypes.map((productType) => (
                   <TableRow key={productType?.id || `row-${Math.random()}`}>
-                    <TableCell>{productType?.id ? productType.id.substring(0, 8) + '...' : 'N/A'}</TableCell>
+                    <TableCell>
+                      {productType?.id
+                        ? productType.id.substring(0, 8) + '...'
+                        : 'N/A'}
+                    </TableCell>
                     <TableCell>{productType?.name || 'Unnamed Type'}</TableCell>
                     <TableCell align="right">
                       <IconButton

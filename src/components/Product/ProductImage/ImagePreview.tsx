@@ -23,7 +23,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ src, alt, onRemove }) => {
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         '&:hover .remove-button': {
           opacity: 1,
-        }
+        },
       }}
     >
       <Image
@@ -51,11 +51,13 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ src, alt, onRemove }) => {
           transition: 'opacity 0.2s',
           '&:hover': {
             background: 'rgba(255,0,0,0.9)',
-          }
+          },
         }}
         onClick={onRemove}
       >
-        <Typography variant="body2" fontWeight="bold">×</Typography>
+        <Typography variant="body2" fontWeight="bold">
+          ×
+        </Typography>
       </Box>
     </Box>
   );

@@ -7,7 +7,7 @@ import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   InputLabel,
   Typography,
-  Box
+  Box,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -23,7 +23,8 @@ const StyledTextField = styled(MuiTextField)(({ theme }) => ({
   },
 }));
 
-interface InputFieldProps extends Omit<TextFieldProps, 'error' | 'label' | 'required'> {
+interface InputFieldProps
+  extends Omit<TextFieldProps, 'error' | 'label' | 'required'> {
   label: string;
   error?: string;
   helpText?: string;

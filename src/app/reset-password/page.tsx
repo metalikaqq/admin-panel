@@ -6,7 +6,7 @@ import {
   Typography,
   Box,
   Paper,
-  Link as MuiLink
+  Link as MuiLink,
 } from '@mui/material';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -28,16 +28,16 @@ export default function ResetPasswordPage() {
   const [errors, setErrors] = useState({
     newPassword: '',
     confirmPassword: '',
-    token: ''
+    token: '',
   });
 
   const { showToast } = useToast();
 
   useEffect(() => {
     if (!token) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        token: 'Invalid or missing reset token'
+        token: 'Invalid or missing reset token',
       }));
     }
   }, [token]);
@@ -47,7 +47,7 @@ export default function ResetPasswordPage() {
     const newErrors = {
       newPassword: '',
       confirmPassword: '',
-      token: errors.token
+      token: errors.token,
     };
 
     if (!token) {
@@ -85,7 +85,7 @@ export default function ResetPasswordPage() {
       const response = await authService.confirmPasswordReset({
         token: token!,
         newPassword,
-        confirmPassword
+        confirmPassword,
       });
 
       if (response.success) {
@@ -109,11 +109,22 @@ export default function ResetPasswordPage() {
 
   return (
     <Container maxWidth="sm" className={s.reset__password}>
-      <Box mt={10} mb={5} display="flex" flexDirection="column" alignItems="center">
+      <Box
+        mt={10}
+        mb={5}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+      >
         <Paper className={s.reset__paper} elevation={3}>
           {!success ? (
             <>
-              <Typography variant="h5" component="h1" fontWeight={600} gutterBottom>
+              <Typography
+                variant="h5"
+                component="h1"
+                fontWeight={600}
+                gutterBottom
+              >
                 Reset Your Password
               </Typography>
               <Typography variant="body1" color="textSecondary" mb={4}>
@@ -121,7 +132,11 @@ export default function ResetPasswordPage() {
               </Typography>
 
               {errors.token && (
-                <Box mb={3} p={2} sx={{ backgroundColor: '#FFF4F4', borderRadius: '8px' }}>
+                <Box
+                  mb={3}
+                  p={2}
+                  sx={{ backgroundColor: '#FFF4F4', borderRadius: '8px' }}
+                >
                   <Typography color="error">{errors.token}</Typography>
                   <Box mt={1}>
                     <Link href="/forgot-password" passHref>
@@ -172,12 +187,28 @@ export default function ResetPasswordPage() {
             </>
           ) : (
             <>
-              <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
-                <Typography variant="h5" component="h1" fontWeight={600} gutterBottom textAlign="center">
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                mb={3}
+              >
+                <Typography
+                  variant="h5"
+                  component="h1"
+                  fontWeight={600}
+                  gutterBottom
+                  textAlign="center"
+                >
                   Password Reset Successful
                 </Typography>
-                <Typography variant="body1" color="textSecondary" textAlign="center">
-                  Your password has been reset successfully. You will be redirected to the login page in a few seconds.
+                <Typography
+                  variant="body1"
+                  color="textSecondary"
+                  textAlign="center"
+                >
+                  Your password has been reset successfully. You will be
+                  redirected to the login page in a few seconds.
                 </Typography>
               </Box>
               <Button
@@ -191,9 +222,7 @@ export default function ResetPasswordPage() {
 
           <Box mt={3} textAlign="center">
             <Link href="/login" passHref>
-              <MuiLink underline="hover">
-                Back to Login
-              </MuiLink>
+              <MuiLink underline="hover">Back to Login</MuiLink>
             </Link>
           </Box>
         </Paper>

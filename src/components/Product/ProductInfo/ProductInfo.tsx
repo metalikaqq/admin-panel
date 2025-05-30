@@ -8,7 +8,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Box, Button, Alert, AlertTitle, Collapse } from '@mui/material';
 import s from './ProductInfo.module.scss';
 import ProductInfoField from './ProductInfoField';
-import { validateProductInfo, ValidationError, isFormValid } from './validation';
+import {
+  validateProductInfo,
+  ValidationError,
+  isFormValid,
+} from './validation';
 
 import { useProductStore } from '@/store/useProductStore';
 
@@ -52,7 +56,9 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
 
   // Використовуємо локальний стан для управління формою
   const [inputs, setInputs] = React.useState<InputField[]>(productInfo);
-  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
+    []
+  );
   const [showValidation, setShowValidation] = useState(false);
 
   // Оновлюємо Zustand store при зміні локального стану
@@ -106,12 +112,12 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       items:
         type === 'list'
           ? [
-            {
-              id: Date.now().toString(),
-              content: { uk: '', en: '' },
-              sublist: [],
-            },
-          ]
+              {
+                id: Date.now().toString(),
+                content: { uk: '', en: '' },
+                sublist: [],
+              },
+            ]
           : undefined,
     };
     setInputs([...inputs, newInput]);
@@ -136,12 +142,12 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       inputs.map((input) =>
         input.id === id
           ? {
-            ...input,
-            value: {
-              ...input.value,
-              [language]: value,
-            },
-          }
+              ...input,
+              value: {
+                ...input.value,
+                [language]: value,
+              },
+            }
           : input
       )
     );
@@ -152,16 +158,16 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
       inputs.map((input) =>
         input.id === id && input.items
           ? {
-            ...input,
-            items: [
-              ...input.items,
-              {
-                id: Date.now().toString(),
-                content: { uk: '', en: '' },
-                sublist: [],
-              },
-            ],
-          }
+              ...input,
+              items: [
+                ...input.items,
+                {
+                  id: Date.now().toString(),
+                  content: { uk: '', en: '' },
+                  sublist: [],
+                },
+              ],
+            }
           : input
       )
     );
@@ -181,9 +187,13 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
                 const currentSublist = item.sublist || [];
 
                 // Check for duplicate IDs (shouldn't happen with timestamp-based IDs, but just to be safe)
-                const isDuplicate = currentSublist.some(subItem => subItem.id === newSubItemId);
+                const isDuplicate = currentSublist.some(
+                  (subItem) => subItem.id === newSubItemId
+                );
                 if (isDuplicate) {
-                  console.warn("Duplicate sublist item ID detected, generating new ID");
+                  console.warn(
+                    'Duplicate sublist item ID detected, generating new ID'
+                  );
                   return item; // Skip this update to avoid duplicates
                 }
 
@@ -194,7 +204,7 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
                     ...currentSublist,
                     {
                       id: newSubItemId,
-                      content: { uk: '', en: '' }
+                      content: { uk: '', en: '' },
                     },
                   ],
                 };
@@ -207,10 +217,10 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
         })
       );
 
-      toast.success("Sublist item added");
+      toast.success('Sublist item added');
     } catch (error) {
-      console.error("Error adding sublist item:", error);
-      toast.error("Failed to add sublist item");
+      console.error('Error adding sublist item:', error);
+      toast.error('Failed to add sublist item');
     }
   };
 
@@ -227,7 +237,10 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
 
       try {
         parsedItem = JSON.parse(value);
-        isSublistUpdate = !!parsedItem && typeof parsedItem === 'object' && !!parsedItem.sublist;
+        isSublistUpdate =
+          !!parsedItem &&
+          typeof parsedItem === 'object' &&
+          !!parsedItem.sublist;
       } catch (e) {
         // Not a JSON string, regular list item update
         isSublistUpdate = false;
@@ -260,8 +273,8 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
         })
       );
     } catch (error) {
-      console.error("Error updating list item:", error);
-      toast.error("Failed to update list item");
+      console.error('Error updating list item:', error);
+      toast.error('Failed to update list item');
     }
   };
 
@@ -287,7 +300,9 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
               onMoveUp={() => moveInputUp(index)}
               onMoveDown={() => moveInputDown(index)}
               onRemove={() => removeInput(input.id)}
-              onValueChange={(lang, value) => updateInputValue(input.id, lang, value)}
+              onValueChange={(lang, value) =>
+                updateInputValue(input.id, lang, value)
+              }
               onListItemChange={updateListItem}
               onAddListItem={() => addListItem(input.id)}
               onAddSublistItem={(itemId) => addSublistItem(input.id, itemId)}
@@ -300,7 +315,10 @@ function ProductInfo({ onUpdate }: ProductInfoProps) {
         <button onClick={() => addInput('productName')} className={s.addButton}>
           Add Product Name
         </button>
-        <button onClick={() => addInput('productTitle')} className={s.addButton}>
+        <button
+          onClick={() => addInput('productTitle')}
+          className={s.addButton}
+        >
           Add Product Title
         </button>
         <button onClick={() => addInput('geninfo')} className={s.addButton}>

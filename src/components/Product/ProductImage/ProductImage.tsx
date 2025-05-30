@@ -59,7 +59,14 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
 
   return (
     <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          mb: 2,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Typography variant="h6" component="h3">
           Product Images
         </Typography>
@@ -80,11 +87,7 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
               onRemove={() => handleRemoveImage(0)}
             />
           ) : (
-            <ImageUpload
-              index={0}
-              onSelect={handleImageChange}
-              isMain
-            />
+            <ImageUpload index={0} onSelect={handleImageChange} isMain />
           )}
         </Box>
       </Box>
@@ -102,10 +105,7 @@ const ProductImage: React.FC<ProductImageProps> = ({ onUpdate }) => {
                 onRemove={() => handleRemoveImage(index + 1)}
               />
             ) : (
-              <ImageUpload
-                index={index + 1}
-                onSelect={handleImageChange}
-              />
+              <ImageUpload index={index + 1} onSelect={handleImageChange} />
             )}
           </Grid>
         ))}

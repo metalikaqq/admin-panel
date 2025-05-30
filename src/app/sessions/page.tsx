@@ -19,7 +19,7 @@ import {
   InputAdornment,
   Grid,
   Card,
-  CardContent
+  CardContent,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
@@ -64,7 +64,7 @@ export default function SessionsPage() {
   const [stats, setStats] = useState({
     activeSessions: 0,
     uniqueUsers: 0,
-    mobileDevices: 0
+    mobileDevices: 0,
   });
 
   // Load user sessions
@@ -82,11 +82,12 @@ export default function SessionsPage() {
     }
 
     const searchLower = searchQuery.toLowerCase();
-    const filtered = sessions.filter(session =>
-      session.username.toLowerCase().includes(searchLower) ||
-      session.email.toLowerCase().includes(searchLower) ||
-      session.ip.includes(searchQuery) ||
-      session.device.toLowerCase().includes(searchLower)
+    const filtered = sessions.filter(
+      (session) =>
+        session.username.toLowerCase().includes(searchLower) ||
+        session.email.toLowerCase().includes(searchLower) ||
+        session.ip.includes(searchQuery) ||
+        session.device.toLowerCase().includes(searchLower)
     );
 
     setFilteredSessions(filtered);
@@ -98,22 +99,25 @@ export default function SessionsPage() {
     if (sessions.length === 0) return;
 
     // Count active sessions
-    const activeSessions = sessions.filter(session => session.isActive).length;
+    const activeSessions = sessions.filter(
+      (session) => session.isActive
+    ).length;
 
     // Count unique users
-    const uniqueUserIds = new Set(sessions.map(session => session.userId));
+    const uniqueUserIds = new Set(sessions.map((session) => session.userId));
 
     // Count mobile devices
-    const mobileDevices = sessions.filter(session =>
-      session.device.toLowerCase().includes('mobile') ||
-      session.device.toLowerCase().includes('phone') ||
-      session.device.toLowerCase().includes('tablet')
+    const mobileDevices = sessions.filter(
+      (session) =>
+        session.device.toLowerCase().includes('mobile') ||
+        session.device.toLowerCase().includes('phone') ||
+        session.device.toLowerCase().includes('tablet')
     ).length;
 
     setStats({
       activeSessions,
       uniqueUsers: uniqueUserIds.size,
-      mobileDevices
+      mobileDevices,
     });
   }, [sessions, setStats]);
 
@@ -142,7 +146,14 @@ export default function SessionsPage() {
   const generateMockSessions = (count: number): UserSession[] => {
     const browsers = ['Chrome', 'Firefox', 'Safari', 'Edge'];
     const oses = ['Windows 10', 'macOS', 'Ubuntu', 'iOS', 'Android'];
-    const devices = ['Desktop', 'Laptop', 'iPhone', 'Android Phone', 'iPad', 'Android Tablet'];
+    const devices = [
+      'Desktop',
+      'Laptop',
+      'iPhone',
+      'Android Phone',
+      'iPad',
+      'Android Tablet',
+    ];
 
     return Array.from({ length: count }, (_, i) => {
       const isActive = Math.random() > 0.2;
@@ -151,7 +162,9 @@ export default function SessionsPage() {
 
       const lastActiveDate = new Date(loginDate);
       if (isActive) {
-        lastActiveDate.setMinutes(lastActiveDate.getMinutes() + Math.floor(Math.random() * 60));
+        lastActiveDate.setMinutes(
+          lastActiveDate.getMinutes() + Math.floor(Math.random() * 60)
+        );
       }
 
       return {
@@ -165,7 +178,7 @@ export default function SessionsPage() {
         device: devices[Math.floor(Math.random() * devices.length)],
         loginTime: loginDate.toISOString(),
         lastActive: lastActiveDate.toISOString(),
-        isActive
+        isActive,
       };
     });
   };
@@ -181,8 +194,8 @@ export default function SessionsPage() {
 
       // Mock successful termination
       setTimeout(() => {
-        setSessions(prevSessions =>
-          prevSessions.map(session =>
+        setSessions((prevSessions) =>
+          prevSessions.map((session) =>
             session.id === selectedSession
               ? { ...session, isActive: false }
               : session
@@ -230,7 +243,10 @@ export default function SessionsPage() {
   // Pagination logic
   const indexOfLastSession = page * sessionsPerPage;
   const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
-  const currentSessions = filteredSessions.slice(indexOfFirstSession, indexOfLastSession);
+  const currentSessions = filteredSessions.slice(
+    indexOfFirstSession,
+    indexOfLastSession
+  );
   const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
 
   if (!user || user.role !== 'ADMIN') {
@@ -263,67 +279,104 @@ export default function SessionsPage() {
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} md={4}>
           <Card>
-            <CardContent sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+            <CardContent
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Box>
-                <Typography color="textSecondary" variant="subtitle1" gutterBottom>
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle1"
+                  gutterBottom
+                >
                   Active Sessions
                 </Typography>
                 <Typography variant="h4" component="div">
-                  {loading ? <CircularProgress size={20} /> : stats.activeSessions}
+                  {loading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    stats.activeSessions
+                  )}
                 </Typography>
               </Box>
-              <PersonIcon sx={{ fontSize: 40, color: 'primary.main', opacity: 0.7 }} />
+              <PersonIcon
+                sx={{ fontSize: 40, color: 'primary.main', opacity: 0.7 }}
+              />
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
           <Card>
-            <CardContent sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+            <CardContent
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Box>
-                <Typography color="textSecondary" variant="subtitle1" gutterBottom>
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle1"
+                  gutterBottom
+                >
                   Unique Users
                 </Typography>
                 <Typography variant="h4" component="div">
                   {loading ? <CircularProgress size={20} /> : stats.uniqueUsers}
                 </Typography>
               </Box>
-              <SecurityIcon sx={{ fontSize: 40, color: 'success.main', opacity: 0.7 }} />
+              <SecurityIcon
+                sx={{ fontSize: 40, color: 'success.main', opacity: 0.7 }}
+              />
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
           <Card>
-            <CardContent sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+            <CardContent
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Box>
-                <Typography color="textSecondary" variant="subtitle1" gutterBottom>
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle1"
+                  gutterBottom
+                >
                   Mobile Devices
                 </Typography>
                 <Typography variant="h4" component="div">
-                  {loading ? <CircularProgress size={20} /> : stats.mobileDevices}
+                  {loading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    stats.mobileDevices
+                  )}
                 </Typography>
               </Box>
-              <DevicesIcon sx={{ fontSize: 40, color: 'warning.main', opacity: 0.7 }} />
+              <DevicesIcon
+                sx={{ fontSize: 40, color: 'warning.main', opacity: 0.7 }}
+              />
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
       {/* Search and Controls */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <TextField
           placeholder="Search by username, email, IP..."
           variant="outlined"
@@ -369,7 +422,11 @@ export default function SessionsPage() {
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                     <CircularProgress size={40} />
-                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ mt: 1 }}
+                    >
                       Loading sessions...
                     </Typography>
                   </TableCell>
@@ -377,9 +434,7 @@ export default function SessionsPage() {
               ) : currentSessions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
-                    <Typography variant="body1">
-                      No sessions found
-                    </Typography>
+                    <Typography variant="body1">No sessions found</Typography>
                     {searchQuery && (
                       <Typography variant="body2" color="textSecondary">
                         Try adjusting your search criteria
@@ -403,7 +458,9 @@ export default function SessionsPage() {
                     <TableCell>{session.ip}</TableCell>
                     <TableCell>
                       <Box>
-                        <Typography variant="body2">{session.device}</Typography>
+                        <Typography variant="body2">
+                          {session.device}
+                        </Typography>
                         <Typography variant="caption" color="textSecondary">
                           {session.browser} / {session.os}
                         </Typography>
@@ -415,8 +472,8 @@ export default function SessionsPage() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={session.isActive ? "Active" : "Inactive"}
-                        color={session.isActive ? "success" : "default"}
+                        label={session.isActive ? 'Active' : 'Inactive'}
+                        color={session.isActive ? 'success' : 'default'}
                         size="small"
                         sx={{ borderRadius: '6px' }}
                       />

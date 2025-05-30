@@ -2,7 +2,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Grid, Paper, Tab, Tabs, CircularProgress } from '@mui/material';
+import {
+  Container,
+  Typography,
+  Box,
+  Grid,
+  Paper,
+  Tab,
+  Tabs,
+  CircularProgress,
+} from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
 import { UserModel, UserRole } from '@/models/UserModel';
 import { authService } from '@/services/authService';
@@ -137,7 +146,10 @@ export default function AccountPage() {
     try {
       const response = await authService.requestPasswordReset(email);
       if (response.success) {
-        showToast('Password reset email sent. Please check your inbox.', 'success');
+        showToast(
+          'Password reset email sent. Please check your inbox.',
+          'success'
+        );
         setEmail('');
       } else {
         showToast(response.error || 'Failed to send reset email', 'error');
@@ -158,8 +170,8 @@ export default function AccountPage() {
         showToast(`User role updated successfully`, 'success');
 
         // Update user in the list
-        setAllUsers(prevUsers =>
-          prevUsers.map(user =>
+        setAllUsers((prevUsers) =>
+          prevUsers.map((user) =>
             user.id === userId ? { ...user, role: newRole } : user
           )
         );
@@ -248,7 +260,9 @@ export default function AccountPage() {
     try {
       const response = await userService.deleteUser(userToDelete);
       if (response.success) {
-        setAllUsers(users => users.filter(user => user.id !== userToDelete));
+        setAllUsers((users) =>
+          users.filter((user) => user.id !== userToDelete)
+        );
         showToast('User deleted successfully', 'success');
       } else {
         showToast(response.error || 'Failed to delete user', 'error');
@@ -292,7 +306,7 @@ export default function AccountPage() {
         lastName,
         username,
         email: profileEmail,
-        profileImage
+        profileImage,
       };
 
       const response = await userService.updateProfile(user.id, updateData);
@@ -348,17 +362,34 @@ export default function AccountPage() {
               aria-label="account tabs"
               variant="fullWidth"
             >
-              <Tab label="Profile" id="account-tab-0" aria-controls="account-tabpanel-0" />
-              <Tab label="Security" id="account-tab-1" aria-controls="account-tabpanel-1" />
+              <Tab
+                label="Profile"
+                id="account-tab-0"
+                aria-controls="account-tabpanel-0"
+              />
+              <Tab
+                label="Security"
+                id="account-tab-1"
+                aria-controls="account-tabpanel-1"
+              />
               {user.role === 'ADMIN' && (
-                <Tab label="User Management" id="account-tab-2" aria-controls="account-tabpanel-2" />
+                <Tab
+                  label="User Management"
+                  id="account-tab-2"
+                  aria-controls="account-tabpanel-2"
+                />
               )}
             </Tabs>
           </Box>
 
           {/* Profile Tab */}
           <TabPanel value={activeTab} index={0}>
-            <Box display="flex" flexDirection="column" alignItems="center" mb={4}>
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              mb={4}
+            >
               <ProfileImage
                 currentImage={profileImage}
                 username={username}
@@ -373,7 +404,9 @@ export default function AccountPage() {
                 <InputField
                   label="First Name"
                   value={firstName}
-                  onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setFirstName(e.target.value)}
+                  onChange={(e: {
+                    target: { value: React.SetStateAction<string> };
+                  }) => setFirstName(e.target.value)}
                   placeholder="Enter your first name"
                 />
               </Grid>
@@ -381,7 +414,9 @@ export default function AccountPage() {
                 <InputField
                   label="Last Name"
                   value={lastName}
-                  onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setLastName(e.target.value)}
+                  onChange={(e: {
+                    target: { value: React.SetStateAction<string> };
+                  }) => setLastName(e.target.value)}
                   placeholder="Enter your last name"
                 />
               </Grid>
@@ -389,7 +424,9 @@ export default function AccountPage() {
                 <InputField
                   label="Username"
                   value={username}
-                  onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setUsername(e.target.value)}
+                  onChange={(e: {
+                    target: { value: React.SetStateAction<string> };
+                  }) => setUsername(e.target.value)}
                   placeholder="Enter your username"
                   required
                 />
@@ -399,7 +436,9 @@ export default function AccountPage() {
                   label="Email"
                   type="email"
                   value={profileEmail}
-                  onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setProfileEmail(e.target.value)}
+                  onChange={(e: {
+                    target: { value: React.SetStateAction<string> };
+                  }) => setProfileEmail(e.target.value)}
                   placeholder="Enter your email address"
                   required
                 />
@@ -429,7 +468,9 @@ export default function AccountPage() {
                     label="Current Password"
                     type="password"
                     value={currentPassword}
-                    onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setCurrentPassword(e.target.value)}
+                    onChange={(e: {
+                      target: { value: React.SetStateAction<string> };
+                    }) => setCurrentPassword(e.target.value)}
                     error={passwordErrors.currentPassword}
                     required
                   />
@@ -439,7 +480,9 @@ export default function AccountPage() {
                     label="New Password"
                     type="password"
                     value={newPassword}
-                    onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setNewPassword(e.target.value)}
+                    onChange={(e: {
+                      target: { value: React.SetStateAction<string> };
+                    }) => setNewPassword(e.target.value)}
                     error={passwordErrors.newPassword}
                     required
                     helpText="Password must be at least 8 characters"
@@ -450,7 +493,9 @@ export default function AccountPage() {
                     label="Confirm New Password"
                     type="password"
                     value={confirmPassword}
-                    onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setConfirmPassword(e.target.value)}
+                    onChange={(e: {
+                      target: { value: React.SetStateAction<string> };
+                    }) => setConfirmPassword(e.target.value)}
                     error={passwordErrors.confirmPassword}
                     required
                   />
@@ -478,7 +523,9 @@ export default function AccountPage() {
                     label="Email"
                     type="email"
                     value={email}
-                    onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setEmail(e.target.value)}
+                    onChange={(e: {
+                      target: { value: React.SetStateAction<string> };
+                    }) => setEmail(e.target.value)}
                     placeholder="Enter your email address"
                     required
                   />
@@ -524,10 +571,12 @@ export default function AccountPage() {
                           <Box display="flex" gap={1} flexWrap="nowrap">
                             <select
                               value={user.role}
-                              onChange={(e) => handleRoleChange(
-                                user.id,
-                                e.target.value as UserRole
-                              )}
+                              onChange={(e) =>
+                                handleRoleChange(
+                                  user.id,
+                                  e.target.value as UserRole
+                                )
+                              }
                               className={s.account__select}
                             >
                               <option value="USER">User</option>

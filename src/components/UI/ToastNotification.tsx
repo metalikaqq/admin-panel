@@ -30,7 +30,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
         sx={{
           width: '100%',
           borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
         }}
       >
         {message}
@@ -44,9 +44,13 @@ interface ToastContextType {
   showToast: (message: string, severity: AlertColor) => void;
 }
 
-const ToastContext = React.createContext<ToastContextType | undefined>(undefined);
+const ToastContext = React.createContext<ToastContextType | undefined>(
+  undefined
+);
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState<AlertColor>('info');

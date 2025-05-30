@@ -11,7 +11,7 @@ import {
   validateProductData,
   createProductPayload,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ProductPayload
+  ProductPayload,
 } from '@/services/productService';
 import s from './page.module.scss';
 
@@ -27,9 +27,12 @@ const FinalPage: React.FC = () => {
     productImages,
     loadFromSessionStorage,
     activeLanguage,
-    selectedProductTypeId
+    selectedProductTypeId,
   } = useProductStore();
-  const [generatedHtml, setGeneratedHtml] = useState<LocalizedContent>({ uk: '', en: '' });
+  const [generatedHtml, setGeneratedHtml] = useState<LocalizedContent>({
+    uk: '',
+    en: '',
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [creationSuccess, setCreationSuccess] = useState(false);
@@ -55,13 +58,21 @@ const FinalPage: React.FC = () => {
       // Fetch product type details for better logging
       const fetchProductTypeDetails = async () => {
         try {
-          const response = await fetch(`http://localhost:3000/product-types/${selectedProductTypeId}`);
+          const response = await fetch(
+            `http://localhost:3000/product-types/${selectedProductTypeId}`
+          );
           if (response.ok) {
             const data = await response.json();
-            console.log('[FinalPage] Complete Product Type Details:', data.data);
+            console.log(
+              '[FinalPage] Complete Product Type Details:',
+              data.data
+            );
           }
         } catch (error) {
-          console.error('[FinalPage] Error fetching product type details:', error);
+          console.error(
+            '[FinalPage] Error fetching product type details:',
+            error
+          );
         }
       };
 
@@ -85,7 +96,10 @@ const FinalPage: React.FC = () => {
    * Display a notification toast
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const showNotification = (message: string, type: 'success' | 'error' | 'info') => {
+  const showNotification = (
+    message: string,
+    type: 'success' | 'error' | 'info'
+  ) => {
     const options = {
       position: 'top-right' as ToastPosition,
       autoClose: 5000,
@@ -111,7 +125,11 @@ const FinalPage: React.FC = () => {
    */
   const handleCreateProduct = async () => {
     // Validate product data using service function
-    const validationResult = validateProductData(productInfo, productImages, selectedProductTypeId);
+    const validationResult = validateProductData(
+      productInfo,
+      productImages,
+      selectedProductTypeId
+    );
     if (!validationResult.valid) {
       toast.error(validationResult.message);
       return;
@@ -142,35 +160,41 @@ const FinalPage: React.FC = () => {
       );
 
       // Detailed product information logs
-      console.log('[FinalPage] Creating product with productType ID:', payload.productTypeId);
+      console.log(
+        '[FinalPage] Creating product with productType ID:',
+        payload.productTypeId
+      );
 
       // Log detailed product information
       console.log('[FinalPage] Complete Product Details:', {
         productTypeId: payload.productTypeId,
         productNames: {
           uk: payload.productNames.uk,
-          en: payload.productNames.en
+          en: payload.productNames.en,
         },
         // Don't log full image URLs for security/brevity
         imagesCount: payload.productImages.length,
-        imageUrls: payload.productImages.map(url => url.substring(0, 50) + '...'),
+        imageUrls: payload.productImages.map(
+          (url) => url.substring(0, 50) + '...'
+        ),
         htmlContent: {
           uk: payload.htmlContent.uk.substring(0, 100) + '...',
-          en: payload.htmlContent.en.substring(0, 100) + '...'
-        }
+          en: payload.htmlContent.en.substring(0, 100) + '...',
+        },
       });
 
       // Product info structure debugging
-      console.log('[FinalPage] Product Info Structure:',
-        productInfo.map(info => ({
+      console.log(
+        '[FinalPage] Product Info Structure:',
+        productInfo.map((info) => ({
           id: info.id,
           type: info.type,
           label: info.label,
           valueLength: {
             uk: info.value.uk.length,
-            en: info.value.en.length
+            en: info.value.en.length,
           },
-          itemsCount: info.items?.length || 0
+          itemsCount: info.items?.length || 0,
         }))
       );
 
@@ -178,7 +202,7 @@ const FinalPage: React.FC = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await createProduct<any>(payload);
 
-      // Log detailed summary of created product 
+      // Log detailed summary of created product
       console.log('[FinalPage] Product created successfully:', result);
 
       // Log complete product creation summary with all info
@@ -191,13 +215,15 @@ const FinalPage: React.FC = () => {
         productNames: payload.productNames,
         productImages: {
           count: payload.productImages.length,
-          urls: payload.productImages.map(url => url.substring(0, 30) + '...')
+          urls: payload.productImages.map(
+            (url) => url.substring(0, 30) + '...'
+          ),
         },
         htmlContentSizes: {
           uk: payload.htmlContent.uk.length,
-          en: payload.htmlContent.en.length
+          en: payload.htmlContent.en.length,
         },
-        responseFromServer: result
+        responseFromServer: result,
       });
 
       toast.success('Product created successfully!');
@@ -205,10 +231,11 @@ const FinalPage: React.FC = () => {
 
       // Optional: Redirect to products list or clear the form
       // window.location.href = '/products';
-
     } catch (error) {
       console.error('[FinalPage] Error in product creation:', error);
-      toast.error(`Failed to create product: ${error instanceof Error ? error.message : 'Please try again'}`);
+      toast.error(
+        `Failed to create product: ${error instanceof Error ? error.message : 'Please try again'}`
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -34,7 +34,9 @@ interface ProductTypeSelectorProps {
   onChange?: (productTypeId: string) => void;
 }
 
-const ProductTypeSelector: React.FC<ProductTypeSelectorProps> = ({ onChange }) => {
+const ProductTypeSelector: React.FC<ProductTypeSelectorProps> = ({
+  onChange,
+}) => {
   const { selectedProductTypeId, setSelectedProductTypeId } = useProductStore();
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,19 +81,22 @@ const ProductTypeSelector: React.FC<ProductTypeSelectorProps> = ({ onChange }) =
     setSelectedProductTypeId(productTypeId);
 
     // Get the selected product type details for better logging
-    const selectedType = Array.isArray(productTypes) ?
-      productTypes.find(type => type.id === productTypeId) :
-      undefined;
+    const selectedType = Array.isArray(productTypes)
+      ? productTypes.find((type) => type.id === productTypeId)
+      : undefined;
 
     console.log('[ProductTypeSelector] Product type selected:', {
       id: productTypeId,
       name: selectedType?.name,
       createdAt: selectedType?.createdAt,
-      updatedAt: selectedType?.updatedAt
+      updatedAt: selectedType?.updatedAt,
     });
 
     // Log store update
-    console.log('[ProductTypeSelector] Updated product type in store:', productTypeId);
+    console.log(
+      '[ProductTypeSelector] Updated product type in store:',
+      productTypeId
+    );
 
     if (onChange) {
       onChange(productTypeId);

@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Paper, Typography, Box, Chip, Tooltip, IconButton } from '@mui/material';
+import {
+  Paper,
+  Typography,
+  Box,
+  Chip,
+  Tooltip,
+  IconButton,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import LoopIcon from '@mui/icons-material/Loop';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -26,7 +33,7 @@ interface SessionInfoProps {
 
 export const SessionInfo: React.FC<SessionInfoProps> = ({
   onRefresh,
-  sessionTimeout = 30 * 60 * 1000 // 30 minutes default
+  sessionTimeout = 30 * 60 * 1000, // 30 minutes default
 }) => {
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [loginTime, setLoginTime] = useState<Date | null>(null);
@@ -98,8 +105,18 @@ export const SessionInfo: React.FC<SessionInfoProps> = ({
 
   return (
     <SessionInfoPaper elevation={1}>
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-        <Typography variant="h6" fontWeight={600} display="flex" alignItems="center">
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={1}
+      >
+        <Typography
+          variant="h6"
+          fontWeight={600}
+          display="flex"
+          alignItems="center"
+        >
           <SecurityIcon sx={{ mr: 1, fontSize: 20 }} />
           Session Information
         </Typography>
@@ -111,8 +128,8 @@ export const SessionInfo: React.FC<SessionInfoProps> = ({
               animation: refreshing ? 'spin 1s linear infinite' : 'none',
               '@keyframes spin': {
                 '0%': { transform: 'rotate(0deg)' },
-                '100%': { transform: 'rotate(360deg)' }
-              }
+                '100%': { transform: 'rotate(360deg)' },
+              },
             }}
           >
             <LoopIcon />
@@ -143,7 +160,12 @@ export const SessionInfo: React.FC<SessionInfoProps> = ({
           <Typography variant="body2" color="textSecondary">
             Logged In At
           </Typography>
-          <Typography variant="body1" display="flex" alignItems="center" mt={0.5}>
+          <Typography
+            variant="body1"
+            display="flex"
+            alignItems="center"
+            mt={0.5}
+          >
             <AccessTimeIcon sx={{ mr: 0.5, fontSize: 16, opacity: 0.7 }} />
             {formatTime(loginTime)}
           </Typography>
@@ -158,9 +180,11 @@ export const SessionInfo: React.FC<SessionInfoProps> = ({
             fontWeight={500}
             mt={0.5}
             color={
-              remainingTime < sessionTimeout * 0.2 ? 'error.main' :
-                remainingTime < sessionTimeout * 0.5 ? 'warning.main' :
-                  'text.primary'
+              remainingTime < sessionTimeout * 0.2
+                ? 'error.main'
+                : remainingTime < sessionTimeout * 0.5
+                  ? 'warning.main'
+                  : 'text.primary'
             }
           >
             {formatRemainingTime()}

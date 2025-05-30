@@ -7,7 +7,11 @@ interface ImageUploadProps {
   isMain?: boolean;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ index, onSelect, isMain = false }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({
+  index,
+  onSelect,
+  isMain = false,
+}) => {
   return (
     <Box
       sx={{
@@ -23,7 +27,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ index, onSelect, isMain = fal
         transition: 'all 0.2s',
         '&:hover': {
           borderColor: '#007FFF',
-          background: 'rgba(0,127,255,0.04)'
+          background: 'rgba(0,127,255,0.04)',
         },
         position: 'relative',
       }}
@@ -41,7 +45,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ index, onSelect, isMain = fal
           fontSize: '24px',
           color: '#999',
           marginBottom: '4px',
-          display: 'block'
+          display: 'block',
         }}
       >
         +

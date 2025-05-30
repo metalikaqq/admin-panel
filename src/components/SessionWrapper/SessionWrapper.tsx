@@ -1,7 +1,10 @@
 'use client';
 
 import React, { ReactNode, useCallback } from 'react';
-import { useSessionTimeout, useSessionManager } from '@/services/sessionService';
+import {
+  useSessionTimeout,
+  useSessionManager,
+} from '@/services/sessionService';
 import { SessionExpiryDialog } from './SessionExpiryDialog';
 import { useAuth } from '@/context/AuthContext';
 
@@ -16,7 +19,7 @@ interface SessionWrapperProps {
  */
 export const SessionWrapper: React.FC<SessionWrapperProps> = ({
   children,
-  timeout = 30 * 60 * 1000 // 30 minutes default
+  timeout = 30 * 60 * 1000, // 30 minutes default
 }) => {
   // Initialize session timeout handling
   useSessionTimeout(timeout);

@@ -6,7 +6,7 @@ import {
   Typography,
   Avatar,
   IconButton,
-  CircularProgress
+  CircularProgress,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -58,7 +58,7 @@ export const ProfileImage: React.FC<ProfileImageProps> = ({
   onImageChange,
   size = 120,
   cloudName,
-  uploadPreset
+  uploadPreset,
 }) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +94,11 @@ export const ProfileImage: React.FC<ProfileImageProps> = ({
       const base64 = await convertFileToBase64(file);
 
       // Upload to cloudinary
-      const imageUrl = await uploadImageToCloudinary(base64, uploadPreset, cloudName);
+      const imageUrl = await uploadImageToCloudinary(
+        base64,
+        uploadPreset,
+        cloudName
+      );
 
       if (imageUrl) {
         onImageChange(imageUrl);
@@ -136,7 +140,7 @@ export const ProfileImage: React.FC<ProfileImageProps> = ({
             width: size,
             height: size,
             fontSize: size * 0.4,
-            bgcolor: currentImage ? 'transparent' : 'primary.main'
+            bgcolor: currentImage ? 'transparent' : 'primary.main',
           }}
           src={currentImage}
         >
@@ -186,7 +190,12 @@ export const ProfileImage: React.FC<ProfileImageProps> = ({
       </Typography>
 
       {error && (
-        <Typography variant="caption" color="error" align="center" sx={{ mt: 1 }}>
+        <Typography
+          variant="caption"
+          color="error"
+          align="center"
+          sx={{ mt: 1 }}
+        >
           {error}
         </Typography>
       )}

@@ -6,7 +6,7 @@ import {
   Typography,
   Box,
   Paper,
-  Link as MuiLink
+  Link as MuiLink,
 } from '@mui/material';
 import Link from 'next/link';
 import { useToast } from '@/components/UI/ToastNotification';
@@ -51,7 +51,10 @@ export default function ForgotPasswordPage() {
         setEmailSent(true);
         showToast('Password reset instructions sent to your email', 'success');
       } else {
-        showToast(response.error || 'Something went wrong, please try again', 'error');
+        showToast(
+          response.error || 'Something went wrong, please try again',
+          'error'
+        );
       }
     } catch (error) {
       console.error('Password reset request failed:', error);
@@ -63,15 +66,27 @@ export default function ForgotPasswordPage() {
 
   return (
     <Container maxWidth="sm" className={s.forgot__password}>
-      <Box mt={10} mb={5} display="flex" flexDirection="column" alignItems="center">
+      <Box
+        mt={10}
+        mb={5}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+      >
         <Paper className={s.forgot__paper} elevation={3}>
           {!emailSent ? (
             <>
-              <Typography variant="h5" component="h1" fontWeight={600} gutterBottom>
+              <Typography
+                variant="h5"
+                component="h1"
+                fontWeight={600}
+                gutterBottom
+              >
                 Reset Your Password
               </Typography>
               <Typography variant="body1" color="textSecondary" mb={4}>
-                Enter your email address and we&#39;ll send you instructions to reset your password.
+                Enter your email address and we&#39;ll send you instructions to
+                reset your password.
               </Typography>
 
               <form onSubmit={handleSubmit} noValidate>
@@ -100,29 +115,43 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <>
-              <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
-                <Typography variant="h5" component="h1" fontWeight={600} gutterBottom textAlign="center">
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                mb={3}
+              >
+                <Typography
+                  variant="h5"
+                  component="h1"
+                  fontWeight={600}
+                  gutterBottom
+                  textAlign="center"
+                >
                   Check Your Email
                 </Typography>
-                <Typography variant="body1" color="textSecondary" textAlign="center">
-                  We&#39;ve sent password reset instructions to <strong>{email}</strong>.
-                  Please check your inbox and spam folders.
+                <Typography
+                  variant="body1"
+                  color="textSecondary"
+                  textAlign="center"
+                >
+                  We&#39;ve sent password reset instructions to{' '}
+                  <strong>{email}</strong>. Please check your inbox and spam
+                  folders.
                 </Typography>
               </Box>
               <Button
                 label="Back to Login"
                 variant="secondary"
                 fullWidth
-                onClick={() => window.location.href = '/login'}
+                onClick={() => (window.location.href = '/login')}
               />
             </>
           )}
 
           <Box mt={3} textAlign="center">
             <Link href="/login" passHref>
-              <MuiLink underline="hover">
-                Return to Login
-              </MuiLink>
+              <MuiLink underline="hover">Return to Login</MuiLink>
             </Link>
           </Box>
         </Paper>

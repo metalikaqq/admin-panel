@@ -30,7 +30,9 @@ const LoginForm = () => {
     // Check if session timed out
     const sessionTimedOut = sessionStorage.getItem('sessionTimedOut');
     if (sessionTimedOut === 'true') {
-      setSessionTimeoutMessage('Your session has expired. Please log in again.');
+      setSessionTimeoutMessage(
+        'Your session has expired. Please log in again.'
+      );
       sessionStorage.removeItem('sessionTimedOut');
     }
   }, [router]);
@@ -66,7 +68,10 @@ const LoginForm = () => {
           router.push('/');
         }, 500);
       } else {
-        setError(response.error || 'Login failed. Please check your credentials and try again.');
+        setError(
+          response.error ||
+          'Login failed. Please check your credentials and try again.'
+        );
       }
     } catch (err) {
       console.error(err);

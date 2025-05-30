@@ -35,11 +35,7 @@ const ColorlibStepIcon = (props: StepIconProps) => {
   return (
     <Box
       sx={{
-        backgroundColor: completed
-          ? '#4caf50'
-          : active
-            ? '#1976d2'
-            : '#ccc',
+        backgroundColor: completed ? '#4caf50' : active ? '#1976d2' : '#ccc',
         color: '#fff',
         width: 40,
         height: 40,
@@ -142,7 +138,9 @@ const ProductStepper: React.FC = () => {
             </StepLabel>
             <StepContent>
               <Box mb={2}>
-                <Typography variant="body2" color="text.secondary">{step.description}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {step.description}
+                </Typography>
               </Box>
 
               {index === 0 && <ProductTypeSelector />}

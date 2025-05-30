@@ -6,7 +6,7 @@ import {
   DialogContentText,
   DialogActions,
   Typography,
-  Box
+  Box,
 } from '@mui/material';
 import { Button } from './Button';
 

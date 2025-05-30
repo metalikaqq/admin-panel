@@ -17,19 +17,23 @@ const PaginationContainer = styled(Box)(({ theme }) => ({
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const PageButton = styled(Button)<{ selected: boolean }>(({ theme, selected }) => ({
-  minWidth: '36px',
-  height: '36px',
-  padding: '4px 8px',
-  margin: '0 4px',
-  borderRadius: '4px',
-  fontWeight: selected ? 'bold' : 'normal',
-  backgroundColor: selected ? theme.palette.primary.main : 'transparent',
-  color: selected ? '#fff' : theme.palette.text.primary,
-  '&:hover': {
-    backgroundColor: selected ? theme.palette.primary.dark : theme.palette.action.hover,
-  },
-}));
+const PageButton = styled(Button)<{ selected: boolean }>(
+  ({ theme, selected }) => ({
+    minWidth: '36px',
+    height: '36px',
+    padding: '4px 8px',
+    margin: '0 4px',
+    borderRadius: '4px',
+    fontWeight: selected ? 'bold' : 'normal',
+    backgroundColor: selected ? theme.palette.primary.main : 'transparent',
+    color: selected ? '#fff' : theme.palette.text.primary,
+    '&:hover': {
+      backgroundColor: selected
+        ? theme.palette.primary.dark
+        : theme.palette.action.hover,
+    },
+  })
+);
 
 const ArrowButton = styled(Button)(({ theme }) => ({
   minWidth: '36px',
@@ -96,10 +100,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <PaginationContainer>
-      <ArrowButton
-        disabled={currentPage === 1}
-        onClick={() => onPageChange(1)}
-      >
+      <ArrowButton disabled={currentPage === 1} onClick={() => onPageChange(1)}>
         <KeyboardDoubleArrowLeftIcon />
       </ArrowButton>
 
@@ -110,7 +111,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <NavigateBeforeIcon />
       </ArrowButton>
 
-      {getPageNumbers().map((page, index) => (
+      {getPageNumbers().map((page, index) =>
         typeof page === 'number' ? (
           <PageButton
             key={index}
@@ -120,11 +121,16 @@ export const Pagination: React.FC<PaginationProps> = ({
             {page}
           </PageButton>
         ) : (
-          <Typography key={index} variant="body2" component="span" sx={{ mx: 1 }}>
+          <Typography
+            key={index}
+            variant="body2"
+            component="span"
+            sx={{ mx: 1 }}
+          >
             {page}
           </Typography>
         )
-      ))}
+      )}
 
       <ArrowButton
         disabled={currentPage === totalPages}
