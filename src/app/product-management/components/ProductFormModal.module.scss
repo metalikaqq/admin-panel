@@ -55,15 +55,20 @@
   object-fit: cover;
 }
 
-.deleteImageButton {
+.imageActions {
   position: absolute !important;
   top: 4px;
   right: 4px;
-  background-color: rgba(255, 255, 255, 0.7) !important;
+  display: flex;
+  gap: 4px;
 }
 
-.deleteImageButton:hover {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+.imageActionButton {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+  }
 }
 
 .errorText {
@@ -76,6 +81,48 @@
   color: #666;
   text-align: center;
   padding: 16px 0;
+}
+
+.editorContainer {
+  min-height: 200px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.editorWrapper {
+  padding: 0;
+  border-radius: 4px;
+
+  :global {
+    .rdw-editor-toolbar {
+      border: none;
+      background-color: #f5f5f5;
+      padding: 8px;
+      margin-bottom: 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .rdw-option-wrapper {
+      border-color: #ddd;
+
+      &:hover {
+        box-shadow: 1px 1px 0 #bbb;
+      }
+
+      &.rdw-option-active {
+        box-shadow: 1px 1px 0 #bbb inset;
+        background-color: #e3e3e3;
+      }
+    }
+  }
+}
+
+.editor {
+  min-height: 150px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 14px;
 }
 
 /* Responsive adjustments */

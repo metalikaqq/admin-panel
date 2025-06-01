@@ -70,7 +70,7 @@ const LoginForm = () => {
       } else {
         setError(
           response.error ||
-          'Login failed. Please check your credentials and try again.'
+            'Login failed. Please check your credentials and try again.'
         );
       }
     } catch (err) {

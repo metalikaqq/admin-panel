@@ -23,14 +23,14 @@ export const userService = {
       endpoint += `&search=${encodeURIComponent(search)}`;
     }
 
-    return apiGet<ApiResponse<UserModel[]>>(endpoint);
+    return apiGet<UserModel[]>(endpoint);
   },
 
   /**
    * Get user by ID
    */
   getUserById: async (id: string): Promise<ApiResponse<UserModel>> => {
-    return apiGet<ApiResponse<UserModel>>(`/users/${id}`);
+    return apiGet<UserModel>(`/users/${id}`);
   },
 
   /**
@@ -41,7 +41,7 @@ export const userService = {
     role: UserRole
   ): Promise<ApiResponse<UserModel>> => {
     const payload: UpdateRoleRequest = { role };
-    return apiPut<UpdateRoleRequest, ApiResponse<UserModel>>(
+    return apiPut<UpdateRoleRequest, UserModel>(
       `/users/${userId}/role`,
       payload
     );
@@ -54,16 +54,13 @@ export const userService = {
     userId: string,
     data: UpdateProfileRequest
   ): Promise<ApiResponse<UserModel>> => {
-    return apiPut<UpdateProfileRequest, ApiResponse<UserModel>>(
-      `/users/${userId}`,
-      data
-    );
+    return apiPut<UpdateProfileRequest, UserModel>(`/users/${userId}`, data);
   },
 
   /**
    * Delete user (admin only)
    */
   deleteUser: async (userId: string): Promise<ApiResponse<void>> => {
-    return apiDelete<ApiResponse<void>>(`/users/${userId}`);
+    return apiDelete<void>(`/users/${userId}`);
   },
 };

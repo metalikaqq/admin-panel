@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   FormControl,
   InputLabel,
@@ -10,11 +10,8 @@ import {
   CircularProgress,
   Box,
 } from '@mui/material';
-import axios from 'axios';
 import { useProductStore } from '@/store/useProductStore';
-
-// Define API base URL
-const API_BASE_URL = 'http://localhost:3000';
+import { apiGet } from '@/services/apiService';
 
 // Define ProductType interface
 interface ProductType {
@@ -22,12 +19,6 @@ interface ProductType {
   name: string;
   createdAt: string;
   updatedAt: string;
-}
-
-// API Response interface
-interface ApiResponse<T> {
-  data: T;
-  error?: string;
 }
 
 interface ProductTypeSelectorProps {
@@ -42,42 +33,7 @@ const ProductTypeSelector: React.FC<ProductTypeSelectorProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchProductTypes();
-  }, []);
-
-  const fetchProductTypes = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get<ApiResponse<ProductType[]>>(
-        `${API_BASE_URL}/product-types`
-      );
-
-      // Ensure we always have an array
-      const data = response.data?.data;
-      if (Array.isArray(data)) {
-        setProductTypes(data);
-
-        // If no product type selected yet but we have product types, select the first one
-        if (!selectedProductTypeId && data.length > 0) {
-          handleChange(data[0].id);
-        }
-      } else {
-        console.error('API response data is not an array:', data);
-        setProductTypes([]);
-        setError('Invalid response format from server');
-      }
-    } catch (error) {
-      console.error('Error fetching product types:', error);
-      setProductTypes([]); // Ensure productTypes is always an array
-      setError('Failed to load product types');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (productTypeId: string) => {
+  const handleChange = useCallback((productTypeId: string) => {
     setSelectedProductTypeId(productTypeId);
 
     // Get the selected product type details for better logging
@@ -101,7 +57,54 @@ const ProductTypeSelector: React.FC<ProductTypeSelectorProps> = ({
     if (onChange) {
       onChange(productTypeId);
     }
-  };
+  }, [productTypes, setSelectedProductTypeId, onChange]);
+
+  const fetchProductTypes = useCallback(async () => {
+    console.log('[ProductTypeSelector] Starting fetchProductTypes...');
+    setLoading(true);
+    setError(null);
+    try {
+      console.log('[ProductTypeSelector] Making request to product-types endpoint');
+
+      const response = await apiGet<ProductType[]>('/product-types');
+
+      console.log('[ProductTypeSelector] Raw response:', response);
+      console.log('[ProductTypeSelector] Response success:', response.success);
+      console.log('[ProductTypeSelector] Response data:', response.data);
+
+      if (response.success && Array.isArray(response.data)) {
+        console.log('[ProductTypeSelector] Data is array, length:', response.data.length);
+        setProductTypes(response.data);
+
+        // If no product type selected yet but we have product types, select the first one
+        if (!selectedProductTypeId && response.data.length > 0) {
+          console.log(
+            '[ProductTypeSelector] Auto-selecting first product type:',
+            response.data[0]
+          );
+          handleChange(response.data[0].id);
+        }
+      } else {
+        console.error(
+          '[ProductTypeSelector] API response failed or data is not an array:',
+          response
+        );
+        setProductTypes([]);
+        setError(response.error || 'Invalid response format from server');
+      }
+    } catch (error) {
+      console.error('[ProductTypeSelector] Error fetching product types:', error);
+      setProductTypes([]); // Ensure productTypes is always an array
+      setError('Failed to load product types');
+    } finally {
+      setLoading(false);
+      console.log('[ProductTypeSelector] fetchProductTypes completed');
+    }
+  }, [selectedProductTypeId, handleChange]);
+
+  useEffect(() => {
+    fetchProductTypes();
+  }, [fetchProductTypes]);
 
   return (
     <FormControl fullWidth sx={{ mb: 3 }} error={!!error}>

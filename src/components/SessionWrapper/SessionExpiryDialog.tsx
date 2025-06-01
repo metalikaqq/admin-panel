@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -31,33 +31,8 @@ export const SessionExpiryDialog: React.FC<SessionExpiryDialogProps> = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const sessionTimeout = 30 * 60 * 1000; // 30 minutes (should match the timeout in sessionService)
 
-  useEffect(() => {
-    // Check session time periodically (every minute)
-    const checkSessionTime = () => {
-      const remainingTime = getRemainingSessionTime(sessionTimeout);
-
-      // If session is about to expire, show the dialog
-      if (remainingTime > 0 && remainingTime <= warningThreshold) {
-        setOpen(true);
-        setCountdown(remainingTime);
-        startCountdown(remainingTime);
-      }
-    };
-
-    // Check immediately and then every minute
-    checkSessionTime();
-    const intervalId = setInterval(checkSessionTime, 60000);
-
-    return () => {
-      clearInterval(intervalId);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [warningThreshold]);
-
   // Start countdown timer when dialog opens
-  const startCountdown = (initialTime: number) => {
+  const startCountdown = useCallback((initialTime: number) => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
@@ -84,7 +59,32 @@ export const SessionExpiryDialog: React.FC<SessionExpiryDialogProps> = ({
       const newProgress = (remaining / warningThreshold) * 100;
       setProgress(newProgress);
     }, updateInterval);
-  };
+  }, [onLogout, warningThreshold]);
+
+  useEffect(() => {
+    // Check session time periodically (every minute)
+    const checkSessionTime = () => {
+      const remainingTime = getRemainingSessionTime(sessionTimeout);
+
+      // If session is about to expire, show the dialog
+      if (remainingTime > 0 && remainingTime <= warningThreshold) {
+        setOpen(true);
+        setCountdown(remainingTime);
+        startCountdown(remainingTime);
+      }
+    };
+
+    // Check immediately and then every minute
+    checkSessionTime();
+    const intervalId = setInterval(checkSessionTime, 60000);
+
+    return () => {
+      clearInterval(intervalId);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [warningThreshold, sessionTimeout, startCountdown]);
 
   const handleExtendSession = () => {
     if (intervalRef.current) {

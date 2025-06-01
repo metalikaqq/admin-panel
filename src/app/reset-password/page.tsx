@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import {
   Container,
   Typography,
   Box,
   Paper,
   Link as MuiLink,
+  CircularProgress,
 } from '@mui/material';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -16,7 +17,7 @@ import { useToast } from '@/components/UI/ToastNotification';
 import { authService } from '@/services/authService';
 import s from './page.module.scss';
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -228,5 +229,27 @@ export default function ResetPasswordPage() {
         </Paper>
       </Box>
     </Container>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <Container maxWidth="sm">
+        <Box
+          mt={10}
+          mb={5}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          minHeight="400px"
+        >
+          <CircularProgress />
+        </Box>
+      </Container>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

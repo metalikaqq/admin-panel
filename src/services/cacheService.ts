@@ -67,12 +67,12 @@ class ApiCacheService {
     const now = Date.now();
     let count = 0;
 
-    for (const [key, item] of this.cache.entries()) {
+    Array.from(this.cache.entries()).forEach(([key, item]) => {
       if (now > item.expiry) {
         this.cache.delete(key);
         count++;
       }
-    }
+    });
 
     return count;
   }

@@ -14,19 +14,61 @@ import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from './apiService';
 const PRODUCTS_ENDPOINT = '/products';
 const PRODUCT_TYPES_ENDPOINT = '/product-types';
 
+// Search and filter interfaces
+export interface ProductSearchParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  productTypeId?: string;
+  sortBy?: 'createdAt' | 'updatedAt' | 'name';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface BulkDeleteRequest {
+  productIds: string[];
+}
+
+export interface ProductStatistics {
+  totalProducts: number;
+  totalProductTypes: number;
+  recentProducts: number;
+  averageImagesPerProduct: number;
+}
+
 /**
- * Get all products with pagination
- * @param page Page number (default: 1)
- * @param limit Items per page (default: 10)
+ * Get all products with pagination, search, and filters
+ * @param params Search and pagination parameters
  * @returns Promise with products list and pagination metadata
  */
 export const getAllProducts = async (
-  page: number = 1,
-  limit: number = 10
-): Promise<ApiResponse<ProductModel[]>> => {
-  return await apiGet<ProductModel[]>(
-    `${PRODUCTS_ENDPOINT}?page=${page}&limit=${limit}`
+  params: ProductSearchParams = {}
+): Promise<ApiResponse<ProductModel[] | ProductListResponse>> => {
+  const { page = 1, limit = 10, search, productTypeId } = params;
+
+  let queryParams = `page=${page}&limit=${limit}`;
+
+  if (search) {
+    queryParams += `&search=${encodeURIComponent(search)}`;
+  }
+
+  if (productTypeId) {
+    queryParams += `&productTypeId=${productTypeId}`;
+  }
+
+  return await apiGet<ProductModel[] | ProductListResponse>(
+    `${PRODUCTS_ENDPOINT}?${queryParams}`,
+    false // Temporarily disable caching to debug
   );
+};
+
+/**
+ * Get product statistics
+ * @returns Promise with product statistics
+ */
+export const getProductStatistics = async (): Promise<
+  ApiResponse<ProductStatistics>
+> => {
+  return await apiGet<ProductStatistics>(`${PRODUCTS_ENDPOINT}/statistics`);
 };
 
 /**
@@ -91,11 +133,42 @@ export const getAllProductTypes = async (): Promise<
   return await apiGet<ProductType[]>(PRODUCT_TYPES_ENDPOINT);
 };
 
+/**
+ * Delete multiple products
+ * @param productIds Array of product IDs to delete
+ * @returns Promise with deletion result
+ */
+export const bulkDeleteProducts = async (
+  productIds: string[]
+): Promise<ApiResponse<void>> => {
+  return await apiDelete<void>(`${PRODUCTS_ENDPOINT}/bulk`, {
+    data: { productIds },
+  });
+};
+
+// Removed duplicate functionality as requested by user
+
+/**
+ * Delete an image from Cloudinary
+ * @param imageUrl URL of the image to delete
+ * @returns Promise with deletion result
+ */
+export const deleteImageFromCloudinary = async (
+  imageUrl: string
+): Promise<ApiResponse<void>> => {
+  return await apiDelete<void>(`/images/cloudinary`, {
+    data: { imageUrl },
+  });
+};
+
 export const productService = {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
+  bulkDeleteProducts,
   getAllProductTypes,
+  getProductStatistics,
+  deleteImageFromCloudinary,
 };

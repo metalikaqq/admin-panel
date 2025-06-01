@@ -118,36 +118,36 @@ function ResponsiveDrawer(props: any) {
     >
       {isLoggedIn
         ? [
-          <MenuItem key="account" onClick={handleAccountClick}>
-            <Link
-              href="/account"
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              Account
-            </Link>
-          </MenuItem>,
-          <MenuItem key="logout" onClick={handleLogoutClick}>
-            Logout
-          </MenuItem>,
-        ]
+            <MenuItem key="account" onClick={handleAccountClick}>
+              <Link
+                href="/account"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                Account
+              </Link>
+            </MenuItem>,
+            <MenuItem key="logout" onClick={handleLogoutClick}>
+              Logout
+            </MenuItem>,
+          ]
         : [
-          <MenuItem key="login" onClick={handleMenuClose}>
-            <Link
-              href="/login"
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              Login
-            </Link>
-          </MenuItem>,
-          <MenuItem key="register" onClick={handleMenuClose}>
-            <Link
-              href="/register"
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              Register
-            </Link>
-          </MenuItem>,
-        ]}
+            <MenuItem key="login" onClick={handleMenuClose}>
+              <Link
+                href="/login"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                Login
+              </Link>
+            </MenuItem>,
+            <MenuItem key="register" onClick={handleMenuClose}>
+              <Link
+                href="/register"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                Register
+              </Link>
+            </MenuItem>,
+          ]}
     </Menu>
   );
   const drawer = (
@@ -181,7 +181,8 @@ function ResponsiveDrawer(props: any) {
                 <AddIcon />
               </ListItemIcon>
               <ListItemText primary="Product Creation" />
-            </ListItemButton>            <ListItemButton component={Link} href="/product-types">
+            </ListItemButton>{' '}
+            <ListItemButton component={Link} href="/product-types">
               <ListItemIcon>
                 <CategoryIcon />
               </ListItemIcon>

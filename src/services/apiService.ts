@@ -37,10 +37,7 @@ export const apiGet = async <T>(
     try {
       const response = await axiosClient.get<ApiResponse<T>>(endpoint);
       console.log(`[ApiService] Response from ${endpoint}:`, response.status);
-      return {
-        ...response.data,
-        success: true,
-      };
+      return response.data;
     } catch (error) {
       console.error(`[ApiService] Error in GET request to ${endpoint}:`, error);
       return {
@@ -133,15 +130,17 @@ export const apiPut = async <T, R>(
 /**
  * Generic DELETE request handler
  * @param endpoint API endpoint path
+ * @param config Optional axios config (for request body in DELETE)
  * @returns Promise with the response data
  */
 export const apiDelete = async <T>(
-  endpoint: string
+  endpoint: string,
+  config?: { data?: unknown }
 ): Promise<ApiResponse<T>> => {
   console.log(`[ApiService] DELETE request to ${endpoint}`);
 
   try {
-    const response = await axiosClient.delete<ApiResponse<T>>(endpoint);
+    const response = await axiosClient.delete<ApiResponse<T>>(endpoint, config);
     console.log(`[ApiService] Response from ${endpoint}:`, response.status);
 
     // Invalidate any cached GET requests that might be affected by this DELETE

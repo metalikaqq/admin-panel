@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   Box,
@@ -68,12 +68,20 @@ const ProductTypesPage: React.FC = () => {
   });
 
   // Fetch product types on component mount
-  useEffect(() => {
-    fetchProductTypes();
+  // Function to show notifications
+  const showNotification = useCallback((
+    message: string,
+    severity: 'success' | 'error' | 'info' | 'warning'
+  ) => {
+    setNotification({
+      open: true,
+      message,
+      severity,
+    });
   }, []);
 
   // Function to fetch product types from API
-  const fetchProductTypes = async () => {
+  const fetchProductTypes = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get<ApiResponse<ProductType[]>>(
@@ -107,19 +115,11 @@ const ProductTypesPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showNotification]);
 
-  // Function to show notifications
-  const showNotification = (
-    message: string,
-    severity: 'success' | 'error' | 'info' | 'warning'
-  ) => {
-    setNotification({
-      open: true,
-      message,
-      severity,
-    });
-  };
+  useEffect(() => {
+    fetchProductTypes();
+  }, [fetchProductTypes]);
 
   // Function to handle adding a new product type
   const handleAddProductType = async () => {

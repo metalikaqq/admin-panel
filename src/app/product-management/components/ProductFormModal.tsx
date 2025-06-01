@@ -22,18 +22,27 @@ import {
   IconButton,
   FormHelperText,
   Alert,
+  Tooltip,
 } from '@mui/material';
+import RichTextEditor from './RichTextEditor';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 import s from './ProductFormModal.module.scss';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import {
   ProductModel,
   ProductType,
   CreateProductRequest,
-  UpdateProductRequest
+  UpdateProductRequest,
 } from '@/models/ProductModel';
 import { productService } from '@/services/productManagementService';
-import { uploadImageToCloudinary, uploadMultipleImages } from '@/services/cloudinaryService';
+import {
+  uploadImageToCloudinary,
+} from '@/services/cloudinaryService';
 
 interface ProductFormModalProps {
   open: boolean;
@@ -106,25 +115,29 @@ export default function ProductFormModal({
   useEffect(() => {
     fetchProductTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Set form values when editing a product
+  }, []);  // Set form values when editing a product
   useEffect(() => {
     if (product && isEditMode) {
-      // Set product name from the first item in array for each language
+      // Set product name from the name field or first item in array for each language
       setName({
         uk: product.productNames.uk?.[0] || '',
         en: product.productNames.en?.[0] || '',
       });
 
       // Set description from htmlContent
+      const ukHtml = product.htmlContent?.uk || '';
+      const enHtml = product.htmlContent?.en || '';
+
       setDescription({
-        uk: product.htmlContent?.uk || '',
-        en: product.htmlContent?.en || '',
+        uk: ukHtml,
+        en: enHtml,
       });
 
       setProductTypeId(product.productTypeId || '');
-      setImages(product.productImages || []);
+
+      // Extract image URLs from the images array (new structure)
+      const imageUrls = product.images?.map(img => img.imageUrl) || [];
+      setImages(imageUrls);
     } else {
       // Reset form for creating a new product
       resetForm();
@@ -169,6 +182,20 @@ export default function ProductFormModal({
   // Handle tab change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+  };
+
+  // Handle rich text editor changes
+  const handleDescriptionChange = (value: string, language: 'uk' | 'en') => {
+    setDescription(prev => ({ ...prev, [language]: value }));
+
+    // Clear errors if any
+    if ((language === 'uk' && errors.descriptionUk) || (language === 'en' && errors.descriptionEn)) {
+      setErrors({
+        ...errors,
+        descriptionUk: language === 'uk' ? '' : errors.descriptionUk,
+        descriptionEn: language === 'en' ? '' : errors.descriptionEn,
+      });
+    }
   };
 
   // Handle image upload
@@ -226,11 +253,93 @@ export default function ProductFormModal({
     }
   };
 
-  // Remove image from array
-  const handleRemoveImage = (index: number) => {
+  // Remove image from array and optionally from Cloudinary
+  const handleRemoveImage = async (index: number, deleteFromCloudinary: boolean = true) => {
+    const imageUrl = images[index];
+
+    try {
+      // Remove from Cloudinary if requested
+      if (deleteFromCloudinary && imageUrl) {
+        setImageLoading(true);
+        const response = await productService.deleteImageFromCloudinary(imageUrl);
+        if (!response.success) {
+          console.warn('Failed to delete image from Cloudinary, but removing from UI');
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting image from Cloudinary:', error);
+      onError('Failed to delete image from cloud storage');
+    } finally {
+      setImageLoading(false);
+    }
+
+    // Remove from local state regardless of Cloudinary deletion result
     const updatedImages = [...images];
     updatedImages.splice(index, 1);
     setImages(updatedImages);
+  };
+
+  // Download single image
+  const handleDownloadImage = (imageUrl: string, index: number) => {
+    try {
+      // Extract filename from URL or use a default name
+      const fileName = imageUrl.split('/').pop() || `product-image-${index + 1}.jpg`;
+
+      // Use FileSaver to download the image
+      saveAs(imageUrl, fileName);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      onError('Failed to download image');
+    }
+  };
+
+  // Download all images as a zip file
+  const handleDownloadAllImages = async () => {
+    if (!images.length) {
+      onError('No images to download');
+      return;
+    }
+
+    try {
+      const zip = new JSZip();
+      const imageFolder = zip.folder('product-images');
+
+      // Show loading indicator
+      setImageLoading(true);
+
+      // Add all images to the zip file
+      const imagePromises = images.map(async (imageUrl, index) => {
+        try {
+          const response = await fetch(imageUrl);
+          if (!response.ok) throw new Error(`Failed to fetch image ${index + 1}`);
+
+          const blob = await response.blob();
+          const fileName = imageUrl.split('/').pop() || `product-image-${index + 1}.jpg`;
+          imageFolder?.file(fileName, blob);
+          return true;
+        } catch (error) {
+          console.error(`Error adding image ${index + 1} to zip:`, error);
+          return false;
+        }
+      });
+
+      await Promise.all(imagePromises);
+
+      // Generate zip file
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+      // Create a product name for the zip file
+      const productName = name.en || name.uk || 'product';
+      const safeName = productName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+
+      // Download the zip file
+      saveAs(zipBlob, `${safeName}-images.zip`);
+    } catch (error) {
+      console.error('Error creating zip file:', error);
+      onError('Failed to download images');
+    } finally {
+      setImageLoading(false);
+    }
   };
 
   // Validate form before submission
@@ -278,12 +387,23 @@ export default function ProductFormModal({
 
     // Validate content length
     if (description.uk && description.uk.length > 5000) {
-      newErrors.descriptionUk = 'Ukrainian description is too long (max 5000 characters)';
+      newErrors.descriptionUk =
+        'Ukrainian description is too long (max 5000 characters)';
       isValid = false;
     }
 
     if (description.en && description.en.length > 5000) {
-      newErrors.descriptionEn = 'English description is too long (max 5000 characters)';
+      newErrors.descriptionEn =
+        'English description is too long (max 5000 characters)';
+      isValid = false;
+    }
+
+    // Check if the editor content is empty (contains only HTML tags without text)
+    const ukTextContent = description.uk.replace(/<[^>]*>/g, '').trim();
+    const enTextContent = description.en.replace(/<[^>]*>/g, '').trim();
+
+    if (!ukTextContent && !enTextContent) {
+      newErrors.descriptionEn = 'Please add description in at least one language';
       isValid = false;
     }
 
@@ -297,6 +417,10 @@ export default function ProductFormModal({
 
     setLoading(true);
     try {
+      // Convert editor states to HTML if not already converted
+      const ukHtmlContent = description.uk;
+      const enHtmlContent = description.en;
+
       if (isEditMode && product) {
         // Update existing product
         const updateData: UpdateProductRequest = {
@@ -305,14 +429,17 @@ export default function ProductFormModal({
             uk: name.uk ? [name.uk] : [],
             en: name.en ? [name.en] : [],
           },
-          productImages: images,
+          images: images,
           htmlContent: {
-            uk: description.uk,
-            en: description.en,
+            uk: ukHtmlContent,
+            en: enHtmlContent,
           },
         };
 
-        const response = await productService.updateProduct(product.id, updateData);
+        const response = await productService.updateProduct(
+          product.id,
+          updateData
+        );
         if (response.success) {
           onSuccess('Product updated successfully');
           onClose(true);
@@ -327,7 +454,7 @@ export default function ProductFormModal({
             uk: name.uk ? [name.uk] : [],
             en: name.en ? [name.en] : [],
           },
-          productImages: images,
+          images: images,
           htmlContent: {
             uk: description.uk,
             en: description.en,
@@ -351,12 +478,7 @@ export default function ProductFormModal({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => onClose(false)}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open={open} onClose={() => onClose(false)} maxWidth="md" fullWidth>
       <DialogTitle>
         {isEditMode ? 'Edit Product' : 'Create New Product'}
       </DialogTitle>
@@ -396,7 +518,9 @@ export default function ProductFormModal({
                     ))
                   )}
                 </Select>
-                {errors.productTypeId && <FormHelperText>{errors.productTypeId}</FormHelperText>}
+                {errors.productTypeId && (
+                  <FormHelperText>{errors.productTypeId}</FormHelperText>
+                )}
               </FormControl>
             </Grid>
 
@@ -404,9 +528,7 @@ export default function ProductFormModal({
               <Typography variant="subtitle1" className={s.sectionTitle}>
                 Product Name
                 {errors.name && (
-                  <span className={s.errorText}>
-                    - {errors.name}
-                  </span>
+                  <span className={s.errorText}>- {errors.name}</span>
                 )}
               </Typography>
             </Grid>
@@ -432,66 +554,83 @@ export default function ProductFormModal({
         </TabPanel>
 
         {/* Images Tab */}
-        <TabPanel value={activeTab} index={1}>
-          <div className={s.formSection}>
+        <TabPanel value={activeTab} index={1}>          <div className={s.formSection}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
             <Typography variant="subtitle1" className={s.sectionTitle}>
               Product Images
               {errors.images && (
-                <span className={s.errorText}>
-                  - {errors.images}
-                </span>
+                <span className={s.errorText}>- {errors.images}</span>
               )}
             </Typography>
 
-            <div className={s.imageUploadContainer}>
-              <input
-                accept="image/*"
-                style={{ display: 'none' }}
-                id="image-upload-button"
-                type="file"
-                onChange={handleImageUpload}
+            {images.length > 0 && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<FileDownloadIcon />}
+                onClick={handleDownloadAllImages}
                 disabled={imageLoading}
-              />
-              <label htmlFor="image-upload-button">
-                <Button
-                  variant="outlined"
+              >
+                Download All
+              </Button>
+            )}
+          </Box>
+
+          <div className={s.imageUploadContainer}>
+            <input
+              accept="image/*"
+              style={{ display: 'none' }}
+              id="image-upload-button"
+              type="file"
+              onChange={handleImageUpload}
+              disabled={imageLoading}
+            />
+            <label htmlFor="image-upload-button">
+              <Button
+                variant="outlined"
+                component="span"
+                startIcon={<AddPhotoAlternateIcon />}
+                disabled={imageLoading}
+              >
+                Select Image
+              </Button>
+            </label>
+
+            {newImageFile && (
+              <>
+                <Typography
+                  variant="body2"
                   component="span"
-                  startIcon={<AddPhotoAlternateIcon />}
+                  className={s.fileName}
+                >
+                  {newImageFile.name}
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={handleAddImage}
                   disabled={imageLoading}
                 >
-                  Select Image
+                  {imageLoading ? <CircularProgress size={20} /> : 'Upload'}
                 </Button>
-              </label>
+              </>
+            )}
 
-              {newImageFile && (
-                <>
-                  <Typography variant="body2" component="span" className={s.fileName}>
-                    {newImageFile.name}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={handleAddImage}
-                    disabled={imageLoading}
-                  >
-                    {imageLoading ? <CircularProgress size={20} /> : 'Upload'}
-                  </Button>
-                </>
-              )}
-
-              {uploadError && (
-                <Box mt={1}>
-                  <Alert severity="error">{uploadError}</Alert>
-                </Box>
-              )}
-            </div>
+            {uploadError && (
+              <Box mt={1}>
+                <Alert severity="error">{uploadError}</Alert>
+              </Box>
+            )}
           </div>
+        </div>
 
           <Grid container spacing={2}>
             {images.length === 0 ? (
               <Grid item xs={12}>
-                <Typography className={s.noImagesText}>No images added yet.</Typography>
+                <Typography className={s.noImagesText}>
+                  No images added yet.
+                </Typography>
               </Grid>
             ) : (
               images.map((image, index) => (
@@ -504,14 +643,28 @@ export default function ProductFormModal({
                       fill
                       objectFit="cover"
                     />
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleRemoveImage(index)}
-                      className={s.deleteImageButton}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    <div className={s.imageActions}>
+                      <Tooltip title="Download image">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleDownloadImage(image, index)}
+                          className={s.imageActionButton}
+                        >
+                          <DownloadIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete image">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleRemoveImage(index)}
+                          className={s.imageActionButton}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </div>
                   </div>
                 </Grid>
               ))
@@ -526,46 +679,38 @@ export default function ProductFormModal({
               <Typography variant="subtitle1" className={s.sectionTitle}>
                 Description (English)
                 {errors.descriptionEn && (
-                  <span className={s.errorText}>
-                    - {errors.descriptionEn}
-                  </span>
+                  <span className={s.errorText}>- {errors.descriptionEn}</span>
                 )}
               </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
+              <RichTextEditor
                 value={description.en}
-                onChange={(e) => setDescription({ ...description, en: e.target.value })}
+                onChange={(value) => handleDescriptionChange(value, 'en')}
+                placeholder="Enter English description..."
                 error={!!errors.descriptionEn}
-                helperText={errors.descriptionEn}
+                maxLength={5000}
               />
-              <Typography variant="caption" color="textSecondary">
-                {description.en ? `${description.en.length}/5000` : '0/5000'} characters
-              </Typography>
+              {errors.descriptionEn && (
+                <FormHelperText error>{errors.descriptionEn}</FormHelperText>
+              )}
             </Grid>
 
             <Grid item xs={12} md={6}>
               <Typography variant="subtitle1" className={s.sectionTitle}>
                 Description (Ukrainian)
                 {errors.descriptionUk && (
-                  <span className={s.errorText}>
-                    - {errors.descriptionUk}
-                  </span>
+                  <span className={s.errorText}>- {errors.descriptionUk}</span>
                 )}
               </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
+              <RichTextEditor
                 value={description.uk}
-                onChange={(e) => setDescription({ ...description, uk: e.target.value })}
+                onChange={(value) => handleDescriptionChange(value, 'uk')}
+                placeholder="Enter Ukrainian description..."
                 error={!!errors.descriptionUk}
-                helperText={errors.descriptionUk}
+                maxLength={5000}
               />
-              <Typography variant="caption" color="textSecondary">
-                {description.uk ? `${description.uk.length}/5000` : '0/5000'} characters
-              </Typography>
+              {errors.descriptionUk && (
+                <FormHelperText error>{errors.descriptionUk}</FormHelperText>
+              )}
             </Grid>
           </Grid>
         </TabPanel>

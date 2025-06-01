@@ -1,12 +1,27 @@
-// Product model representing a product in the system
-export interface ProductModel {
+// Image interface for product images
+export interface ProductImage {
   id: string;
-  productTypeId: string;
-  productNames: ProductNames;
-  productImages: string[];
-  htmlContent: LocalizedContent;
+  imageUrl: string;
+  isMain: boolean;
   createdAt: string;
   updatedAt: string;
+  productId: string;
+}
+
+// Product model representing a product in the system (matches backend response)
+export interface ProductModel {
+  id: string;
+  name: string;
+  productNames: ProductNames;
+  htmlContent: LocalizedContent;
+  images: ProductImage[];
+  productTypeId: string;
+  productType: {
+    id: string;
+    name: string;
+  };
+  createdAt: string;
+  updatedAt?: string;
 }
 
 // Localized content interface (for content that has both Ukrainian and English versions)
@@ -33,7 +48,7 @@ export interface ProductType {
 export interface CreateProductRequest {
   productTypeId: string;
   productNames: ProductNames;
-  productImages: string[];
+  images?: string[]; // Image URLs to upload
   htmlContent: LocalizedContent;
 }
 
@@ -41,16 +56,19 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest {
   productTypeId?: string;
   productNames?: ProductNames;
-  productImages?: string[];
+  images?: string[]; // Image URLs to upload
   htmlContent?: LocalizedContent;
 }
 
 // Response format for paginated product list
 export interface ProductListResponse {
-  products: ProductModel[];
-  metadata: {
-    total: number;
+  data: ProductModel[];
+  pagination: {
     page: number;
     limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
   };
 }

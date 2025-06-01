@@ -29,10 +29,10 @@ export const authService = {
   register: async (
     userData: CreateUserRequest
   ): Promise<ApiResponse<AuthResponseData>> => {
-    const response = await apiPost<
-      CreateUserRequest,
-      ApiResponse<AuthResponseData>
-    >('/auth/register', userData);
+    const response = await apiPost<CreateUserRequest, AuthResponseData>(
+      '/auth/register',
+      userData
+    );
 
     if (response.success && response.data?.access_token) {
       // Store token in cookies
@@ -52,7 +52,7 @@ export const authService = {
   login: async (
     credentials: LoginRequest
   ): Promise<ApiResponse<AuthResponseData>> => {
-    const response = await apiPost<LoginRequest, ApiResponse<AuthResponseData>>(
+    const response = await apiPost<LoginRequest, AuthResponseData>(
       '/auth/login',
       credentials
     );
@@ -73,7 +73,7 @@ export const authService = {
    * Get current user profile
    */
   getProfile: async (): Promise<ApiResponse<UserModel>> => {
-    return apiGet<ApiResponse<UserModel>>('/auth/profile');
+    return apiGet<UserModel>('/auth/profile');
   },
 
   /**
@@ -83,7 +83,7 @@ export const authService = {
     email: string
   ): Promise<ApiResponse<{ message: string }>> => {
     const payload: PasswordResetRequest = { email };
-    return apiPost<PasswordResetRequest, ApiResponse<{ message: string }>>(
+    return apiPost<PasswordResetRequest, { message: string }>(
       '/auth/password-reset',
       payload
     );
@@ -95,7 +95,7 @@ export const authService = {
   confirmPasswordReset: async (
     data: PasswordResetConfirmation
   ): Promise<ApiResponse<{ message: string }>> => {
-    return apiPost<PasswordResetConfirmation, ApiResponse<{ message: string }>>(
+    return apiPost<PasswordResetConfirmation, { message: string }>(
       '/auth/password-reset/confirm',
       data
     );
@@ -107,7 +107,7 @@ export const authService = {
   changePassword: async (
     data: PasswordChangeRequest
   ): Promise<ApiResponse<{ message: string }>> => {
-    return apiPost<PasswordChangeRequest, ApiResponse<{ message: string }>>(
+    return apiPost<PasswordChangeRequest, { message: string }>(
       '/auth/change-password',
       data
     );

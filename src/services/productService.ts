@@ -39,7 +39,7 @@ import { apiPost } from './apiService';
  */
 export const createProduct = async <T>(
   productData: ProductPayload
-): Promise<T> => {
+): Promise<ApiResponse<T>> => {
   console.log('[ProductService] Creating product with payload:', productData);
 
   try {
