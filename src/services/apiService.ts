@@ -105,6 +105,7 @@ export const apiPut = async <T, R>(
   data: T
 ): Promise<ApiResponse<R>> => {
   console.log(`[ApiService] PUT request to ${endpoint}`);
+  console.log(`[ApiService] PUT request data:`, JSON.stringify(data, null, 2));
 
   try {
     const response = await axiosClient.put<ApiResponse<R>>(endpoint, data);
@@ -119,9 +120,30 @@ export const apiPut = async <T, R>(
     };
   } catch (error: unknown) {
     console.error(`[ApiService] Error in PUT request to ${endpoint}:`, error);
+
+    // Type guard for axios error
+    const isAxiosError = (
+      err: unknown
+    ): err is {
+      response?: { data?: { message?: string }; status?: number };
+      message?: string;
+    } => {
+      return typeof err === 'object' && err !== null && 'response' in err;
+    };
+
+    if (isAxiosError(error)) {
+      console.error(`[ApiService] Error response data:`, error.response?.data);
+      console.error(
+        `[ApiService] Error response status:`,
+        error.response?.status
+      );
+    }
+
     return {
       data: {} as R,
-      error: error instanceof Error ? error.message : 'Request failed',
+      error: isAxiosError(error)
+        ? error.response?.data?.message || error.message || 'Request failed'
+        : 'Request failed',
       success: false,
     };
   }

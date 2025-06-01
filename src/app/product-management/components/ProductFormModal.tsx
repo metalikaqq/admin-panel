@@ -111,9 +111,13 @@ export default function ProductFormModal({
 
   // Fetch product types when component mounts
   useEffect(() => {
-    fetchProductTypes();
+    if (open) {
+      fetchProductTypes();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Set form values when editing a product
+  }, [open]);
+
+  // Set form values when editing a product
   useEffect(() => {
     if (product && isEditMode) {
       // Set product name from the name field or first item in array for each language
@@ -161,6 +165,8 @@ export default function ProductFormModal({
 
   // Fetch product types
   const fetchProductTypes = async () => {
+    if (!open) return; // Don't fetch if modal is not open
+
     setTypesLoading(true);
     try {
       const response = await productService.getAllProductTypes();
@@ -173,7 +179,9 @@ export default function ProductFormModal({
       console.error('Error loading product types:', error);
       onError('Error loading product types');
     } finally {
-      setTypesLoading(false);
+      if (open) { // Only update state if modal is still open
+        setTypesLoading(false);
+      }
     }
   };
 
@@ -434,18 +442,36 @@ export default function ProductFormModal({
 
       if (isEditMode && product) {
         // Update existing product
+        // Convert image URLs back to the format expected by backend
+        const imageObjects = images.map((imageUrl, index) => ({
+          imageUrl,
+          isMain: index === 0 // First image is main
+        }));
+
         const updateData: UpdateProductRequest = {
           productTypeId,
           productNames: {
             uk: name.uk ? [name.uk] : [],
             en: name.en ? [name.en] : [],
           },
-          images: images,
+          images: imageObjects, // Send as objects instead of strings
           htmlContent: {
             uk: ukHtmlContent,
             en: enHtmlContent,
           },
         };
+
+        console.log('[ProductFormModal] Updating product with data:', {
+          productId: product.id,
+          updateData: JSON.stringify(updateData, null, 2)
+        });
+
+        console.log('[ProductFormModal] About to call updateProduct API with:', {
+          productId: product.id,
+          imageObjects: imageObjects,
+          originalImages: images,
+          updateDataString: JSON.stringify(updateData)
+        });
 
         const response = await productService.updateProduct(
           product.id,
@@ -455,6 +481,11 @@ export default function ProductFormModal({
           onSuccess('Product updated successfully');
           onClose(true);
         } else {
+          console.error('[ProductFormModal] Update failed:', {
+            error: response.error,
+            productId: product.id,
+            updateData: updateData
+          });
           onError(response.error || 'Failed to update product');
         }
       } else {
@@ -481,7 +512,18 @@ export default function ProductFormModal({
         }
       }
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error('[ProductFormModal] Error saving product:', error);
+      // Log more details about the error
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number, statusText?: string, data?: unknown }, config?: { url?: string, method?: string } };
+        console.error('[ProductFormModal] Axios error details:', {
+          status: axiosError.response?.status,
+          statusText: axiosError.response?.statusText,
+          data: axiosError.response?.data,
+          url: axiosError.config?.url,
+          method: axiosError.config?.method
+        });
+      }
       onError('An error occurred while saving the product');
     } finally {
       setLoading(false);

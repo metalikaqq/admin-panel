@@ -43,7 +43,14 @@ export interface ProductStatistics {
 export const getAllProducts = async (
   params: ProductSearchParams = {}
 ): Promise<ApiResponse<ProductModel[] | ProductListResponse>> => {
-  const { page = 1, limit = 10, search, productTypeId } = params;
+  const {
+    page = 1,
+    limit = 10,
+    search,
+    productTypeId,
+    sortBy,
+    sortOrder,
+  } = params;
 
   let queryParams = `page=${page}&limit=${limit}`;
 
@@ -53,6 +60,14 @@ export const getAllProducts = async (
 
   if (productTypeId) {
     queryParams += `&productTypeId=${productTypeId}`;
+  }
+
+  if (sortBy) {
+    queryParams += `&sortBy=${sortBy}`;
+  }
+
+  if (sortOrder) {
+    queryParams += `&sortOrder=${sortOrder}`;
   }
 
   return await apiGet<ProductModel[] | ProductListResponse>(
