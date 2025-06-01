@@ -4,20 +4,26 @@ import '@testing-library/jest-dom';
 import RichTextEditor from './RichTextEditor';
 
 // Mock next/dynamic
-jest.mock('next/dynamic', () => (component: () => Promise<{ default: React.ComponentType }>) => {
-  return function MockedDynamicComponent(props: Record<string, unknown>) {
-    const Component = React.lazy(component);
-    return (
-      <React.Suspense fallback={<div>Loading...</div>}>
-        <Component {...props} />
-      </React.Suspense>
-    );
-  };
-});
+jest.mock(
+  'next/dynamic',
+  () => (component: () => Promise<{ default: React.ComponentType }>) => {
+    return function MockedDynamicComponent(props: Record<string, unknown>) {
+      const Component = React.lazy(component);
+      return (
+        <React.Suspense fallback={<div>Loading...</div>}>
+          <Component {...props} />
+        </React.Suspense>
+      );
+    };
+  }
+);
 
 // Mock react-draft-wysiwyg
 jest.mock('react-draft-wysiwyg', () => ({
-  Editor: (props: { onEditorStateChange?: (state: unknown) => void; placeholder?: string }) => {
+  Editor: (props: {
+    onEditorStateChange?: (state: unknown) => void;
+    placeholder?: string;
+  }) => {
     const handleChange = () => {
       // Mock editor state change
       if (props.onEditorStateChange) {
@@ -55,7 +61,12 @@ jest.mock('@mui/material', () => ({
   CircularProgress: ({ size }: { size: number }) => (
     <div data-testid="loading-spinner">Loading... (size: {size})</div>
   ),
-  Box: ({ children, ...props }: Record<string, unknown> & { children: React.ReactNode }) => <div {...props}>{children}</div>,
+  Box: ({
+    children,
+    ...props
+  }: Record<string, unknown> & { children: React.ReactNode }) => (
+    <div {...props}>{children}</div>
+  ),
 }));
 
 describe('RichTextEditor', () => {
@@ -67,12 +78,7 @@ describe('RichTextEditor', () => {
   test('renders loading spinner initially', () => {
     const mockOnChange = jest.fn();
 
-    render(
-      <RichTextEditor
-        value=""
-        onChange={mockOnChange}
-      />
-    );
+    render(<RichTextEditor value="" onChange={mockOnChange} />);
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
@@ -100,7 +106,7 @@ describe('RichTextEditor', () => {
 
   test('displays placeholder text', async () => {
     const mockOnChange = jest.fn();
-    const placeholder = "Enter your content here";
+    const placeholder = 'Enter your content here';
 
     render(
       <RichTextEditor
@@ -118,13 +124,7 @@ describe('RichTextEditor', () => {
   test('handles disabled state', () => {
     const mockOnChange = jest.fn();
 
-    render(
-      <RichTextEditor
-        value=""
-        onChange={mockOnChange}
-        disabled={true}
-      />
-    );
+    render(<RichTextEditor value="" onChange={mockOnChange} disabled={true} />);
 
     // Component should still render
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
@@ -133,13 +133,7 @@ describe('RichTextEditor', () => {
   test('handles error state', () => {
     const mockOnChange = jest.fn();
 
-    render(
-      <RichTextEditor
-        value=""
-        onChange={mockOnChange}
-        error={true}
-      />
-    );
+    render(<RichTextEditor value="" onChange={mockOnChange} error={true} />);
 
     // Component should still render
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();

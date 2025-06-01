@@ -21,7 +21,10 @@ import {
   AccessTime,
 } from '@mui/icons-material';
 import s from './page.module.scss';
-import { productService, ProductStatistics } from '@/services/productManagementService';
+import {
+  productService,
+  ProductStatistics,
+} from '@/services/productManagementService';
 
 interface StatCard {
   title: string;
@@ -116,12 +119,24 @@ export default function StatisticsPage() {
             <Grid item xs={12} sm={6} md={3} key={index}>
               <Card className={s.statCard} elevation={2}>
                 <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
                     <Box>
-                      <Typography variant="h4" component="div" color={`${card.color}.main`}>
+                      <Typography
+                        variant="h4"
+                        component="div"
+                        color={`${card.color}.main`}
+                      >
                         {card.value}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        gutterBottom
+                      >
                         {card.title}
                       </Typography>
                       {card.suffix && (
@@ -133,9 +148,7 @@ export default function StatisticsPage() {
                         />
                       )}
                     </Box>
-                    <Box color={`${card.color}.main`}>
-                      {card.icon}
-                    </Box>
+                    <Box color={`${card.color}.main`}>{card.icon}</Box>
                   </Box>
                 </CardContent>
               </Card>

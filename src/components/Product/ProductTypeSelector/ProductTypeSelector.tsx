@@ -33,38 +33,43 @@ const ProductTypeSelector: React.FC<ProductTypeSelectorProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = useCallback((productTypeId: string) => {
-    setSelectedProductTypeId(productTypeId);
+  const handleChange = useCallback(
+    (productTypeId: string) => {
+      setSelectedProductTypeId(productTypeId);
 
-    // Get the selected product type details for better logging
-    const selectedType = Array.isArray(productTypes)
-      ? productTypes.find((type) => type.id === productTypeId)
-      : undefined;
+      // Get the selected product type details for better logging
+      const selectedType = Array.isArray(productTypes)
+        ? productTypes.find((type) => type.id === productTypeId)
+        : undefined;
 
-    console.log('[ProductTypeSelector] Product type selected:', {
-      id: productTypeId,
-      name: selectedType?.name,
-      createdAt: selectedType?.createdAt,
-      updatedAt: selectedType?.updatedAt,
-    });
+      console.log('[ProductTypeSelector] Product type selected:', {
+        id: productTypeId,
+        name: selectedType?.name,
+        createdAt: selectedType?.createdAt,
+        updatedAt: selectedType?.updatedAt,
+      });
 
-    // Log store update
-    console.log(
-      '[ProductTypeSelector] Updated product type in store:',
-      productTypeId
-    );
+      // Log store update
+      console.log(
+        '[ProductTypeSelector] Updated product type in store:',
+        productTypeId
+      );
 
-    if (onChange) {
-      onChange(productTypeId);
-    }
-  }, [productTypes, setSelectedProductTypeId, onChange]);
+      if (onChange) {
+        onChange(productTypeId);
+      }
+    },
+    [productTypes, setSelectedProductTypeId, onChange]
+  );
 
   const fetchProductTypes = useCallback(async () => {
     console.log('[ProductTypeSelector] Starting fetchProductTypes...');
     setLoading(true);
     setError(null);
     try {
-      console.log('[ProductTypeSelector] Making request to product-types endpoint');
+      console.log(
+        '[ProductTypeSelector] Making request to product-types endpoint'
+      );
 
       const response = await apiGet<ProductType[]>('/product-types');
 
@@ -73,7 +78,10 @@ const ProductTypeSelector: React.FC<ProductTypeSelectorProps> = ({
       console.log('[ProductTypeSelector] Response data:', response.data);
 
       if (response.success && Array.isArray(response.data)) {
-        console.log('[ProductTypeSelector] Data is array, length:', response.data.length);
+        console.log(
+          '[ProductTypeSelector] Data is array, length:',
+          response.data.length
+        );
         setProductTypes(response.data);
 
         // If no product type selected yet but we have product types, select the first one
@@ -93,7 +101,10 @@ const ProductTypeSelector: React.FC<ProductTypeSelectorProps> = ({
         setError(response.error || 'Invalid response format from server');
       }
     } catch (error) {
-      console.error('[ProductTypeSelector] Error fetching product types:', error);
+      console.error(
+        '[ProductTypeSelector] Error fetching product types:',
+        error
+      );
       setProductTypes([]); // Ensure productTypes is always an array
       setError('Failed to load product types');
     } finally {

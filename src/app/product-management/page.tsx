@@ -36,7 +36,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { ProductModel, ProductType } from '@/models/ProductModel';
-import { productService, ProductSearchParams } from '@/services/productManagementService';
+import {
+  productService,
+  ProductSearchParams,
+} from '@/services/productManagementService';
 import { Pagination } from '@/components/UI/Pagination';
 import ProductFormModal from './components/ProductFormModal';
 
@@ -162,7 +165,9 @@ export default function ProductManagementPage() {
       if (response.success) {
         // Remove deleted product from the list
         setProducts(
-          (products || []).filter((product) => product.id !== selectedProduct.id)
+          (products || []).filter(
+            (product) => product.id !== selectedProduct.id
+          )
         );
         showNotification('Product deleted successfully', 'success');
       } else {
@@ -331,14 +336,15 @@ export default function ProductManagementPage() {
                               'Unnamed'}
                           </div>
                           <div className={s.mobileOnlyInfo}>
-                            <span>Type: {
-                              product.productType?.name ||
-                              productTypes.find(type => type.id === product.productTypeId)?.name ||
-                              'Unknown'
-                            }</span>
                             <span>
-                              Images: {product.images?.length || 0}
+                              Type:{' '}
+                              {product.productType?.name ||
+                                productTypes.find(
+                                  (type) => type.id === product.productTypeId
+                                )?.name ||
+                                'Unknown'}
                             </span>
+                            <span>Images: {product.images?.length || 0}</span>
                             <span>
                               Created:{' '}
                               {new Date(product.createdAt).toLocaleDateString()}
@@ -348,7 +354,9 @@ export default function ProductManagementPage() {
                       </TableCell>
                       <TableCell className={s.hideOnMobile}>
                         {product.productType?.name ||
-                          productTypes.find(type => type.id === product.productTypeId)?.name ||
+                          productTypes.find(
+                            (type) => type.id === product.productTypeId
+                          )?.name ||
                           'Unknown'}
                       </TableCell>
                       <TableCell className={s.hideOnMobile}>

@@ -234,21 +234,23 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <Container maxWidth="sm">
-        <Box
-          mt={10}
-          mb={5}
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          minHeight="400px"
-        >
-          <CircularProgress />
-        </Box>
-      </Container>
-    }>
+    <Suspense
+      fallback={
+        <Container maxWidth="sm">
+          <Box
+            mt={10}
+            mb={5}
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            minHeight="400px"
+          >
+            <CircularProgress />
+          </Box>
+        </Container>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );

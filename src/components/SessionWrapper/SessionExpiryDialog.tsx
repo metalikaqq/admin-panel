@@ -32,34 +32,37 @@ export const SessionExpiryDialog: React.FC<SessionExpiryDialogProps> = ({
   const sessionTimeout = 30 * 60 * 1000; // 30 minutes (should match the timeout in sessionService)
 
   // Start countdown timer when dialog opens
-  const startCountdown = useCallback((initialTime: number) => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    const updateInterval = 1000; // update every second
-    const startTime = Date.now();
-    const endTime = startTime + initialTime;
-
-    intervalRef.current = setInterval(() => {
-      const now = Date.now();
-      const remaining = endTime - now;
-
-      if (remaining <= 0) {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-        // Session expired - call logout
-        onLogout();
-        return;
+  const startCountdown = useCallback(
+    (initialTime: number) => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
 
-      setCountdown(remaining);
-      // Calculate progress percentage
-      const newProgress = (remaining / warningThreshold) * 100;
-      setProgress(newProgress);
-    }, updateInterval);
-  }, [onLogout, warningThreshold]);
+      const updateInterval = 1000; // update every second
+      const startTime = Date.now();
+      const endTime = startTime + initialTime;
+
+      intervalRef.current = setInterval(() => {
+        const now = Date.now();
+        const remaining = endTime - now;
+
+        if (remaining <= 0) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          // Session expired - call logout
+          onLogout();
+          return;
+        }
+
+        setCountdown(remaining);
+        // Calculate progress percentage
+        const newProgress = (remaining / warningThreshold) * 100;
+        setProgress(newProgress);
+      }, updateInterval);
+    },
+    [onLogout, warningThreshold]
+  );
 
   useEffect(() => {
     // Check session time periodically (every minute)

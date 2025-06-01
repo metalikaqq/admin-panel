@@ -40,9 +40,7 @@ import {
   UpdateProductRequest,
 } from '@/models/ProductModel';
 import { productService } from '@/services/productManagementService';
-import {
-  uploadImageToCloudinary,
-} from '@/services/cloudinaryService';
+import { uploadImageToCloudinary } from '@/services/cloudinaryService';
 
 interface ProductFormModalProps {
   open: boolean;
@@ -115,7 +113,7 @@ export default function ProductFormModal({
   useEffect(() => {
     fetchProductTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);  // Set form values when editing a product
+  }, []); // Set form values when editing a product
   useEffect(() => {
     if (product && isEditMode) {
       // Set product name from the name field or first item in array for each language
@@ -136,7 +134,7 @@ export default function ProductFormModal({
       setProductTypeId(product.productTypeId || '');
 
       // Extract image URLs from the images array (new structure)
-      const imageUrls = product.images?.map(img => img.imageUrl) || [];
+      const imageUrls = product.images?.map((img) => img.imageUrl) || [];
       setImages(imageUrls);
     } else {
       // Reset form for creating a new product
@@ -186,10 +184,13 @@ export default function ProductFormModal({
 
   // Handle rich text editor changes
   const handleDescriptionChange = (value: string, language: 'uk' | 'en') => {
-    setDescription(prev => ({ ...prev, [language]: value }));
+    setDescription((prev) => ({ ...prev, [language]: value }));
 
     // Clear errors if any
-    if ((language === 'uk' && errors.descriptionUk) || (language === 'en' && errors.descriptionEn)) {
+    if (
+      (language === 'uk' && errors.descriptionUk) ||
+      (language === 'en' && errors.descriptionEn)
+    ) {
       setErrors({
         ...errors,
         descriptionUk: language === 'uk' ? '' : errors.descriptionUk,
@@ -254,16 +255,22 @@ export default function ProductFormModal({
   };
 
   // Remove image from array and optionally from Cloudinary
-  const handleRemoveImage = async (index: number, deleteFromCloudinary: boolean = true) => {
+  const handleRemoveImage = async (
+    index: number,
+    deleteFromCloudinary: boolean = true
+  ) => {
     const imageUrl = images[index];
 
     try {
       // Remove from Cloudinary if requested
       if (deleteFromCloudinary && imageUrl) {
         setImageLoading(true);
-        const response = await productService.deleteImageFromCloudinary(imageUrl);
+        const response =
+          await productService.deleteImageFromCloudinary(imageUrl);
         if (!response.success) {
-          console.warn('Failed to delete image from Cloudinary, but removing from UI');
+          console.warn(
+            'Failed to delete image from Cloudinary, but removing from UI'
+          );
         }
       }
     } catch (error) {
@@ -283,7 +290,8 @@ export default function ProductFormModal({
   const handleDownloadImage = (imageUrl: string, index: number) => {
     try {
       // Extract filename from URL or use a default name
-      const fileName = imageUrl.split('/').pop() || `product-image-${index + 1}.jpg`;
+      const fileName =
+        imageUrl.split('/').pop() || `product-image-${index + 1}.jpg`;
 
       // Use FileSaver to download the image
       saveAs(imageUrl, fileName);
@@ -311,10 +319,12 @@ export default function ProductFormModal({
       const imagePromises = images.map(async (imageUrl, index) => {
         try {
           const response = await fetch(imageUrl);
-          if (!response.ok) throw new Error(`Failed to fetch image ${index + 1}`);
+          if (!response.ok)
+            throw new Error(`Failed to fetch image ${index + 1}`);
 
           const blob = await response.blob();
-          const fileName = imageUrl.split('/').pop() || `product-image-${index + 1}.jpg`;
+          const fileName =
+            imageUrl.split('/').pop() || `product-image-${index + 1}.jpg`;
           imageFolder?.file(fileName, blob);
           return true;
         } catch (error) {
@@ -403,7 +413,8 @@ export default function ProductFormModal({
     const enTextContent = description.en.replace(/<[^>]*>/g, '').trim();
 
     if (!ukTextContent && !enTextContent) {
-      newErrors.descriptionEn = 'Please add description in at least one language';
+      newErrors.descriptionEn =
+        'Please add description in at least one language';
       isValid = false;
     }
 
@@ -554,77 +565,82 @@ export default function ProductFormModal({
         </TabPanel>
 
         {/* Images Tab */}
-        <TabPanel value={activeTab} index={1}>          <div className={s.formSection}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="subtitle1" className={s.sectionTitle}>
-              Product Images
-              {errors.images && (
-                <span className={s.errorText}>- {errors.images}</span>
-              )}
-            </Typography>
+        <TabPanel value={activeTab} index={1}>
+          {' '}
+          <div className={s.formSection}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Typography variant="subtitle1" className={s.sectionTitle}>
+                Product Images
+                {errors.images && (
+                  <span className={s.errorText}>- {errors.images}</span>
+                )}
+              </Typography>
 
-            {images.length > 0 && (
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<FileDownloadIcon />}
-                onClick={handleDownloadAllImages}
-                disabled={imageLoading}
-              >
-                Download All
-              </Button>
-            )}
-          </Box>
-
-          <div className={s.imageUploadContainer}>
-            <input
-              accept="image/*"
-              style={{ display: 'none' }}
-              id="image-upload-button"
-              type="file"
-              onChange={handleImageUpload}
-              disabled={imageLoading}
-            />
-            <label htmlFor="image-upload-button">
-              <Button
-                variant="outlined"
-                component="span"
-                startIcon={<AddPhotoAlternateIcon />}
-                disabled={imageLoading}
-              >
-                Select Image
-              </Button>
-            </label>
-
-            {newImageFile && (
-              <>
-                <Typography
-                  variant="body2"
-                  component="span"
-                  className={s.fileName}
-                >
-                  {newImageFile.name}
-                </Typography>
+              {images.length > 0 && (
                 <Button
-                  variant="contained"
-                  color="primary"
                   size="small"
-                  onClick={handleAddImage}
+                  variant="outlined"
+                  startIcon={<FileDownloadIcon />}
+                  onClick={handleDownloadAllImages}
                   disabled={imageLoading}
                 >
-                  {imageLoading ? <CircularProgress size={20} /> : 'Upload'}
+                  Download All
                 </Button>
-              </>
-            )}
+              )}
+            </Box>
 
-            {uploadError && (
-              <Box mt={1}>
-                <Alert severity="error">{uploadError}</Alert>
-              </Box>
-            )}
+            <div className={s.imageUploadContainer}>
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="image-upload-button"
+                type="file"
+                onChange={handleImageUpload}
+                disabled={imageLoading}
+              />
+              <label htmlFor="image-upload-button">
+                <Button
+                  variant="outlined"
+                  component="span"
+                  startIcon={<AddPhotoAlternateIcon />}
+                  disabled={imageLoading}
+                >
+                  Select Image
+                </Button>
+              </label>
+
+              {newImageFile && (
+                <>
+                  <Typography
+                    variant="body2"
+                    component="span"
+                    className={s.fileName}
+                  >
+                    {newImageFile.name}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={handleAddImage}
+                    disabled={imageLoading}
+                  >
+                    {imageLoading ? <CircularProgress size={20} /> : 'Upload'}
+                  </Button>
+                </>
+              )}
+
+              {uploadError && (
+                <Box mt={1}>
+                  <Alert severity="error">{uploadError}</Alert>
+                </Box>
+              )}
+            </div>
           </div>
-        </div>
-
           <Grid container spacing={2}>
             {images.length === 0 ? (
               <Grid item xs={12}>

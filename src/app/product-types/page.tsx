@@ -69,16 +69,16 @@ const ProductTypesPage: React.FC = () => {
 
   // Fetch product types on component mount
   // Function to show notifications
-  const showNotification = useCallback((
-    message: string,
-    severity: 'success' | 'error' | 'info' | 'warning'
-  ) => {
-    setNotification({
-      open: true,
-      message,
-      severity,
-    });
-  }, []);
+  const showNotification = useCallback(
+    (message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
+      setNotification({
+        open: true,
+        message,
+        severity,
+      });
+    },
+    []
+  );
 
   // Function to fetch product types from API
   const fetchProductTypes = useCallback(async () => {

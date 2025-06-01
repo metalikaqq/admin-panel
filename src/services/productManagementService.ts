@@ -56,8 +56,7 @@ export const getAllProducts = async (
   }
 
   return await apiGet<ProductModel[] | ProductListResponse>(
-    `${PRODUCTS_ENDPOINT}?${queryParams}`,
-    false // Temporarily disable caching to debug
+    `${PRODUCTS_ENDPOINT}?${queryParams}`
   );
 };
 

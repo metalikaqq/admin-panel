@@ -14,7 +14,12 @@ const Editor = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height={200}
+      >
         <CircularProgress size={24} />
       </Box>
     ),
@@ -38,7 +43,9 @@ export default function RichTextEditor({
   disabled = false,
   maxLength,
 }: RichTextEditorProps) {
-  const [editorState, setEditorState] = useState<EditorState>(EditorState.createEmpty());
+  const [editorState, setEditorState] = useState<EditorState>(
+    EditorState.createEmpty()
+  );
   const [isClient, setIsClient] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -90,7 +97,12 @@ export default function RichTextEditor({
   // Don't render anything on server side
   if (!isClient) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height={200}
+      >
         <CircularProgress size={24} />
       </Box>
     );
@@ -150,8 +162,14 @@ export default function RichTextEditor({
     <div>
       <Editor {...editorProps} />
       {maxLength && (
-        <Box mt={1} textAlign="right" fontSize="0.875rem" color="text.secondary">
-          {editorState.getCurrentContent().getPlainText().length}/{maxLength} characters
+        <Box
+          mt={1}
+          textAlign="right"
+          fontSize="0.875rem"
+          color="text.secondary"
+        >
+          {editorState.getCurrentContent().getPlainText().length}/{maxLength}{' '}
+          characters
         </Box>
       )}
     </div>
