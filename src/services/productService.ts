@@ -54,12 +54,12 @@ export const createProduct = async <T>(
       productData
     );
     console.log('[ProductService] Product creation response:', responseData);
-    
+
     // Check if the request was actually successful
     if (!responseData.success) {
       throw new Error(responseData.error || 'Failed to create product');
     }
-    
+
     console.log('[ProductService] Product created successfully:', responseData);
     return responseData;
   } catch (error) {

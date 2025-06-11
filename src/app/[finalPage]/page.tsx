@@ -233,18 +233,18 @@ const FinalPage: React.FC = () => {
       // window.location.href = '/products';
     } catch (error) {
       console.error('[FinalPage] Error in product creation:', error);
-      
+
       // Extract more detailed error information
       let errorMessage = 'Please try again';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       console.error('[FinalPage] Detailed error information:', {
         error: error,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
+
       toast.error(`Failed to create product: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
