@@ -179,7 +179,8 @@ export default function ProductFormModal({
       console.error('Error loading product types:', error);
       onError('Error loading product types');
     } finally {
-      if (open) { // Only update state if modal is still open
+      if (open) {
+        // Only update state if modal is still open
         setTypesLoading(false);
       }
     }
@@ -445,7 +446,7 @@ export default function ProductFormModal({
         // Convert image URLs back to the format expected by backend
         const imageObjects = images.map((imageUrl, index) => ({
           imageUrl,
-          isMain: index === 0 // First image is main
+          isMain: index === 0, // First image is main
         }));
 
         const updateData: UpdateProductRequest = {
@@ -463,15 +464,18 @@ export default function ProductFormModal({
 
         console.log('[ProductFormModal] Updating product with data:', {
           productId: product.id,
-          updateData: JSON.stringify(updateData, null, 2)
+          updateData: JSON.stringify(updateData, null, 2),
         });
 
-        console.log('[ProductFormModal] About to call updateProduct API with:', {
-          productId: product.id,
-          imageObjects: imageObjects,
-          originalImages: images,
-          updateDataString: JSON.stringify(updateData)
-        });
+        console.log(
+          '[ProductFormModal] About to call updateProduct API with:',
+          {
+            productId: product.id,
+            imageObjects: imageObjects,
+            originalImages: images,
+            updateDataString: JSON.stringify(updateData),
+          }
+        );
 
         const response = await productService.updateProduct(
           product.id,
@@ -484,19 +488,24 @@ export default function ProductFormModal({
           console.error('[ProductFormModal] Update failed:', {
             error: response.error,
             productId: product.id,
-            updateData: updateData
+            updateData: updateData,
           });
           onError(response.error || 'Failed to update product');
         }
       } else {
         // Create new product
+        const imageObjects = images.map((imageUrl, index) => ({
+          imageUrl,
+          isMain: index === 0, // First image is main
+        }));
+
         const productData: CreateProductRequest = {
           productTypeId,
           productNames: {
             uk: name.uk ? [name.uk] : [],
             en: name.en ? [name.en] : [],
           },
-          images: images,
+          images: imageObjects, // Now using ProductImage[] format
           htmlContent: {
             uk: description.uk,
             en: description.en,
@@ -515,13 +524,16 @@ export default function ProductFormModal({
       console.error('[ProductFormModal] Error saving product:', error);
       // Log more details about the error
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { status?: number, statusText?: string, data?: unknown }, config?: { url?: string, method?: string } };
+        const axiosError = error as {
+          response?: { status?: number; statusText?: string; data?: unknown };
+          config?: { url?: string; method?: string };
+        };
         console.error('[ProductFormModal] Axios error details:', {
           status: axiosError.response?.status,
           statusText: axiosError.response?.statusText,
           data: axiosError.response?.data,
           url: axiosError.config?.url,
-          method: axiosError.config?.method
+          method: axiosError.config?.method,
         });
       }
       onError('An error occurred while saving the product');

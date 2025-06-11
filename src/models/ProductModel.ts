@@ -1,4 +1,4 @@
-// Image interface for product images
+// Image interface for product images (full model from database)
 export interface ProductImage {
   id: string;
   imageUrl: string;
@@ -6,6 +6,12 @@ export interface ProductImage {
   createdAt: string;
   updatedAt: string;
   productId: string;
+}
+
+// Image interface for creating/updating products (only required fields)
+export interface ProductImageInput {
+  imageUrl: string;
+  isMain: boolean;
 }
 
 // Product model representing a product in the system (matches backend response)
@@ -48,7 +54,7 @@ export interface ProductType {
 export interface CreateProductRequest {
   productTypeId: string;
   productNames: ProductNames;
-  images?: string[]; // Image URLs to upload
+  images: ProductImageInput[]; // Changed to ProductImageInput
   htmlContent: LocalizedContent;
 }
 
@@ -56,7 +62,7 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest {
   productTypeId?: string;
   productNames?: ProductNames;
-  images?: string[]; // Image URLs to upload
+  images?: ProductImageInput[]; // Changed to ProductImageInput
   htmlContent?: LocalizedContent;
 }
 

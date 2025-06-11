@@ -17,10 +17,15 @@ export interface ProductNames {
   en: string[];
 }
 
+export interface ProductImage {
+  imageUrl: string;
+  isMain: boolean;
+}
+
 export interface ProductPayload {
   productTypeId: string;
   productNames: ProductNames;
-  productImages: string[];
+  images: ProductImage[]; // Змінено з productImages на images
   htmlContent: LocalizedContent;
 }
 
@@ -48,6 +53,13 @@ export const createProduct = async <T>(
       '/products',
       productData
     );
+    console.log('[ProductService] Product creation response:', responseData);
+    
+    // Check if the request was actually successful
+    if (!responseData.success) {
+      throw new Error(responseData.error || 'Failed to create product');
+    }
+    
     console.log('[ProductService] Product created successfully:', responseData);
     return responseData;
   } catch (error) {
@@ -120,6 +132,12 @@ export const createProductPayload = (
     );
   }
 
+  // Create images array with proper structure for backend
+  const images: ProductImage[] = productImages.map((imageUrl, index) => ({
+    imageUrl: imageUrl,
+    isMain: index === 0, // First image is main
+  }));
+
   // Structure payload with all required fields
   return {
     productTypeId: selectedProductTypeId,
@@ -127,7 +145,7 @@ export const createProductPayload = (
       uk: productNamesUk,
       en: productNamesEn,
     },
-    productImages: productImages,
+    images: images, // Змінено з productImages на images
     htmlContent: {
       uk: generatedHtml.uk,
       en: generatedHtml.en,

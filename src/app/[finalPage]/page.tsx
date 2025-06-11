@@ -173,9 +173,9 @@ const FinalPage: React.FC = () => {
           en: payload.productNames.en,
         },
         // Don't log full image URLs for security/brevity
-        imagesCount: payload.productImages.length,
-        imageUrls: payload.productImages.map(
-          (url) => url.substring(0, 50) + '...'
+        imagesCount: payload.images.length,
+        imageUrls: payload.images.map(
+          (img) => img.imageUrl.substring(0, 50) + '...'
         ),
         htmlContent: {
           uk: payload.htmlContent.uk.substring(0, 100) + '...',
@@ -214,9 +214,9 @@ const FinalPage: React.FC = () => {
         },
         productNames: payload.productNames,
         productImages: {
-          count: payload.productImages.length,
-          urls: payload.productImages.map(
-            (url) => url.substring(0, 30) + '...'
+          count: payload.images.length,
+          urls: payload.images.map(
+            (img) => img.imageUrl.substring(0, 30) + '...'
           ),
         },
         htmlContentSizes: {
@@ -233,9 +233,19 @@ const FinalPage: React.FC = () => {
       // window.location.href = '/products';
     } catch (error) {
       console.error('[FinalPage] Error in product creation:', error);
-      toast.error(
-        `Failed to create product: ${error instanceof Error ? error.message : 'Please try again'}`
-      );
+      
+      // Extract more detailed error information
+      let errorMessage = 'Please try again';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      console.error('[FinalPage] Detailed error information:', {
+        error: error,
+        timestamp: new Date().toISOString()
+      });
+      
+      toast.error(`Failed to create product: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
